@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-charcoal: #12161c;
+  --color-charcoal-light: #1a2029;
+  --color-charcoal-lighter: #232a35;
+  --color-border: #2a3240;
+
+  --color-win: #3ecf6e;
+  --color-loss: #e0554f;
+  --color-push: #d9a441;
+  --color-pending: #7b8794;
+}
+
+@layer base {
+  body {
+    @apply bg-charcoal text-slate-100 font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+}
