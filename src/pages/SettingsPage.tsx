@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import { useBankroll } from '../hooks/useBankroll'
@@ -106,9 +105,7 @@ export function SettingsPage() {
   return (
     <div className="min-h-screen bg-charcoal">
       <Header>
-        <Link to="/" className="text-sm text-slate-400 transition hover:text-slate-100">
-          ← {t('nav.back')}
-        </Link>
+        <Avatar url={profileState.profile?.avatar_url ?? null} username={username || '?'} />
       </Header>
 
       <main className="mx-auto max-w-lg space-y-6 px-6 py-8">

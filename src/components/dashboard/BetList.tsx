@@ -33,9 +33,10 @@ type Props = {
   onEdit: (bet: Bet) => void
   onDelete: (betId: string) => void
   onSettle: (betId: string, status: BetStatus) => void
+  emptyMessage?: string
 }
 
-export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle }: Props) {
+export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle, emptyMessage }: Props) {
   const { t, locale } = useLocale()
   const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US'
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -43,7 +44,7 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
   if (bets.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-slate-500">
-        {t('dashboard.noBets')}
+        {emptyMessage ?? t('dashboard.noBets')}
       </div>
     )
   }

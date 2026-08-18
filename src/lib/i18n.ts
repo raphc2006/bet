@@ -6,6 +6,19 @@ const fr = {
   'nav.settings': 'Paramètres',
   'nav.logout': 'Déconnexion',
   'nav.back': 'Retour',
+  'nav.dashboard': 'Tableau de bord',
+  'nav.stats': 'Statistiques',
+  'nav.bets': 'Paris',
+
+  'stats.pageTitle': 'Statistiques',
+  'stats.thisMonth': 'Ce mois-ci',
+  'stats.thisWeek': 'Cette semaine',
+  'stats.general': 'Général',
+
+  'bets.pageTitle': 'Paris',
+  'bets.today': "Aujourd'hui",
+  'bets.noBetsForDay': 'Aucun pari ce jour-là.',
+  'bets.pickDate': 'Choisir une date',
 
   'login.title': 'Connexion',
   'login.subtitle': 'Accède à ton suivi de paris.',
@@ -144,6 +157,19 @@ const en: typeof fr = {
   'nav.settings': 'Settings',
   'nav.logout': 'Log out',
   'nav.back': 'Back',
+  'nav.dashboard': 'Dashboard',
+  'nav.stats': 'Stats',
+  'nav.bets': 'Bets',
+
+  'stats.pageTitle': 'Stats',
+  'stats.thisMonth': 'This month',
+  'stats.thisWeek': 'This week',
+  'stats.general': 'General',
+
+  'bets.pageTitle': 'Bets',
+  'bets.today': 'Today',
+  'bets.noBetsForDay': 'No bets on this day.',
+  'bets.pickDate': 'Pick a date',
 
   'login.title': 'Log in',
   'login.subtitle': 'Access your bet tracker.',

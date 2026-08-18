@@ -1,20 +1,17 @@
-import { useMemo, useState } from 'react'
-import {
-  addMonths,
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameMonth,
-  startOfMonth,
-  startOfWeek,
-  subMonths,
-} from 'date-fns'
+import { useMemo } from 'react'
+import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek, subMonths } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { formatSignedCurrency } from '../../lib/format'
 import { useLocale } from '../../hooks/useLocale'
 
-export function PnlCalendar({ dailyNet, currency }: { dailyNet: Map<string, number>; currency: string }) {
+type Props = {
+  dailyNet: Map<string, number>
+  currency: string
+  month: Date
+  onMonthChange: (month: Date) => void
+}
+
+export function PnlCalendar({ dailyNet, currency, month, onMonthChange }: Props) {
   const { locale, t } = useLocale()
   const dateFnsLocale = locale === 'fr' ? fr : enUS
   const weekdays = [
@@ -26,7 +23,6 @@ export function PnlCalendar({ dailyNet, currency }: { dailyNet: Map<string, numb
     t('calendar.weekday.sat'),
     t('calendar.weekday.sun'),
   ]
-  const [month, setMonth] = useState(() => new Date())
 
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(month), { weekStartsOn: 1 })
@@ -45,13 +41,13 @@ export function PnlCalendar({ dailyNet, currency }: { dailyNet: Map<string, numb
   return (
     <div className="rounded-xl border border-border bg-charcoal-light p-4">
       <div className="mb-3 flex items-center justify-between">
-        <button onClick={() => setMonth((m) => subMonths(m, 1))} className="px-2 text-slate-400 hover:text-slate-100">
+        <button onClick={() => onMonthChange(subMonths(month, 1))} className="px-2 text-slate-400 hover:text-slate-100">
           ‹
         </button>
         <p className="font-display text-lg capitalize text-slate-100">
           {format(month, 'MMMM yyyy', { locale: dateFnsLocale })}
         </p>
-        <button onClick={() => setMonth((m) => addMonths(m, 1))} className="px-2 text-slate-400 hover:text-slate-100">
+        <button onClick={() => onMonthChange(addMonths(month, 1))} className="px-2 text-slate-400 hover:text-slate-100">
           ›
         </button>
       </div>

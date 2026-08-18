@@ -30,20 +30,28 @@ function legsFromBet(bet: Bet, format: OddsFormat): LegFormState[] {
 type Props = {
   bet?: Bet
   defaultOddsFormat?: OddsFormat
+  defaultDate?: Date
   onClose: () => void
   onSubmit: (input: BetInput) => Promise<{ error: string | null }>
 }
 
-export function BetForm({ bet, defaultOddsFormat = 'decimal', onClose, onSubmit }: Props) {
+export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClose, onSubmit }: Props) {
   const { t } = useLocale()
   const [oddsFormat, setOddsFormat] = useState<OddsFormat>(defaultOddsFormat)
   const [betType, setBetType] = useState<BetType>((bet?.bet_type as BetType) ?? 'single')
   const [stake, setStake] = useState(bet ? String(bet.stake) : '')
   const [confidence, setConfidence] = useState(bet?.confidence ? String(bet.confidence) : '')
   const [notes, setNotes] = useState(bet?.notes ?? '')
-  const [placedAt, setPlacedAt] = useState(
-    bet ? bet.placed_at.slice(0, 16) : new Date().toISOString().slice(0, 16),
-  )
+  const [placedAt, setPlacedAt] = useState(() => {
+    if (bet) return bet.placed_at.slice(0, 16)
+    if (defaultDate) {
+      const now = new Date()
+      const combined = new Date(defaultDate)
+      combined.setHours(now.getHours(), now.getMinutes())
+      return combined.toISOString().slice(0, 16)
+    }
+    return new Date().toISOString().slice(0, 16)
+  })
   const [legs, setLegs] = useState<LegFormState[]>(bet ? legsFromBet(bet, defaultOddsFormat) : [emptyLeg()])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)

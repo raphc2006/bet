@@ -104,3 +104,20 @@ export function currentBalance(startingAmount: number, bets: Bet[], adjustments:
   const adjustmentsTotal = adjustments.reduce((sum, a) => sum + a.amount, 0)
   return startingAmount + settledProfit + adjustmentsTotal
 }
+
+/** Paris placés entre start et end (inclus), utilisé pour les stats par mois/semaine. */
+export function betsInRange(bets: Bet[], start: Date, end: Date): Bet[] {
+  return bets.filter((bet) => {
+    const placedAt = new Date(bet.placed_at)
+    return placedAt >= start && placedAt <= end
+  })
+}
+
+/** Paris placés le même jour calendaire que `day`. */
+export function betsOnDay(bets: Bet[], day: Date): Bet[] {
+  const start = new Date(day)
+  start.setHours(0, 0, 0, 0)
+  const end = new Date(day)
+  end.setHours(23, 59, 59, 999)
+  return betsInRange(bets, start, end)
+}
