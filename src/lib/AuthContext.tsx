@@ -2,6 +2,8 @@ import { createContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { useLocale } from '../hooks/useLocale'
+import type { TranslationKey } from './i18n'
 
 type AuthContextValue = {
   user: User | null
@@ -14,7 +16,15 @@ type AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+const ERROR_KEYS: Record<string, TranslationKey> = {
+  'Invalid login credentials': 'auth.error.invalidCredentials',
+  'User already registered': 'auth.error.userExists',
+  'Password should be at least 6 characters': 'auth.error.weakPassword',
+  'Email not confirmed': 'auth.error.emailNotConfirmed',
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { t } = useLocale()
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -31,6 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.subscription.unsubscribe()
   }, [])
+
+  function translateAuthError(message: string): string {
+    const key = ERROR_KEYS[message]
+    return key ? t(key) : message
+  }
 
   async function signUp(email: string, password: string, username: string) {
     const { error } = await supabase.auth.signUp({
@@ -59,14 +74,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-function translateAuthError(message: string): string {
-  const known: Record<string, string> = {
-    'Invalid login credentials': 'Email ou mot de passe incorrect.',
-    'User already registered': 'Un compte existe déjà avec cet email.',
-    'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 6 caractères.',
-    'Email not confirmed': 'Confirme ton email avant de te connecter (vérifie ta boîte de réception).',
-  }
-  return known[message] ?? message
 }

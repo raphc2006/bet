@@ -2,10 +2,12 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useLocale } from '../hooks/useLocale'
 import { AuthCard, ErrorBanner, FormField } from '../components/auth/AuthCard'
 
 export function LoginPage() {
   const { signIn } = useAuth()
+  const { t } = useLocale()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,11 +28,11 @@ export function LoginPage() {
   }
 
   return (
-    <AuthCard title="Connexion" subtitle="Accède à ton suivi de paris.">
+    <AuthCard title={t('login.title')} subtitle={t('login.subtitle')}>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         {error && <ErrorBanner message={error} />}
         <FormField
-          label="Email"
+          label={t('login.email')}
           type="email"
           autoComplete="email"
           required
@@ -38,7 +40,7 @@ export function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
         <FormField
-          label="Mot de passe"
+          label={t('login.password')}
           type="password"
           autoComplete="current-password"
           required
@@ -50,13 +52,13 @@ export function LoginPage() {
           disabled={submitting}
           className="w-full rounded-lg bg-win px-4 py-2 font-display text-lg font-semibold tracking-wide text-charcoal transition hover:brightness-110 disabled:opacity-50"
         >
-          {submitting ? 'Connexion…' : 'Se connecter'}
+          {submitting ? t('login.submitting') : t('login.submit')}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-slate-400">
-        Pas encore de compte ?{' '}
+        {t('login.noAccount')}{' '}
         <Link to="/signup" className="font-medium text-win hover:underline">
-          Créer un compte
+          {t('login.createAccount')}
         </Link>
       </p>
     </AuthCard>

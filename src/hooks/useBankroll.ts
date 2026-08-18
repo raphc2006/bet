@@ -76,6 +76,19 @@ export function useBankroll() {
     return { error: null }
   }
 
+  async function updateCurrency(currency: string) {
+    if (!user) return { error: 'Non connecté.' }
+    const { data, error } = await supabase
+      .from('bankrolls')
+      .update({ currency })
+      .eq('user_id', user.id)
+      .select('*')
+      .single()
+    if (error) return { error: error.message }
+    setBankroll(data)
+    return { error: null }
+  }
+
   async function addAdjustment(amount: number, note: string) {
     if (!user) return { error: 'Non connecté.' }
     const { data, error } = await supabase
@@ -95,5 +108,15 @@ export function useBankroll() {
     return { error: null }
   }
 
-  return { bankroll, adjustments, loading, error, updateConfig, addAdjustment, deleteAdjustment, reload: load }
+  return {
+    bankroll,
+    adjustments,
+    loading,
+    error,
+    updateConfig,
+    updateCurrency,
+    addAdjustment,
+    deleteAdjustment,
+    reload: load,
+  }
 }

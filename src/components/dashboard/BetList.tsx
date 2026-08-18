@@ -2,16 +2,19 @@ import { useState } from 'react'
 import type { Bet, BetStatus } from '../../types/domain'
 import { betDecimalOdds, betProfit } from '../../lib/stats'
 import { formatCurrency, formatSignedCurrency } from '../../lib/format'
-import { formatOdds } from '../../lib/odds'
+import { formatOdds, type OddsFormat } from '../../lib/odds'
+import { useLocale } from '../../hooks/useLocale'
+import type { TranslationKey } from '../../lib/i18n'
 
-const STATUS_LABEL: Record<BetStatus, string> = {
-  pending: 'En attente',
-  won: 'Gagné',
-  lost: 'Perdu',
-  push: 'Push',
+const STATUS_KEY: Record<BetStatus, TranslationKey> = {
+  pending: 'betlist.statusPending',
+  won: 'betlist.statusWon',
+  lost: 'betlist.statusLost',
+  push: 'betlist.statusPush',
 }
 
 function StatusBadge({ status }: { status: BetStatus }) {
+  const { t } = useLocale()
   const tone =
     status === 'won'
       ? 'bg-win/10 text-win border-win/30'
@@ -20,24 +23,27 @@ function StatusBadge({ status }: { status: BetStatus }) {
         : status === 'push'
           ? 'bg-push/10 text-push border-push/30'
           : 'bg-pending/10 text-pending border-pending/30'
-  return <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${tone}`}>{STATUS_LABEL[status]}</span>
+  return <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${tone}`}>{t(STATUS_KEY[status])}</span>
 }
 
 type Props = {
   bets: Bet[]
   currency: string
+  oddsFormat: OddsFormat
   onEdit: (bet: Bet) => void
   onDelete: (betId: string) => void
   onSettle: (betId: string, status: BetStatus) => void
 }
 
-export function BetList({ bets, currency, onEdit, onDelete, onSettle }: Props) {
+export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle }: Props) {
+  const { t, locale } = useLocale()
+  const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US'
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   if (bets.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-slate-500">
-        Aucun pari enregistré pour le moment.
+        {t('dashboard.noBets')}
       </div>
     )
   }
@@ -53,7 +59,7 @@ export function BetList({ bets, currency, onEdit, onDelete, onSettle }: Props) {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs uppercase tracking-wide text-slate-500">
-                    {bet.bet_type === 'single' ? 'Simple' : `Parlay (${bet.bet_legs.length})`}
+                    {bet.bet_type === 'single' ? t('betlist.single') : t('betlist.parlay', { n: bet.bet_legs.length })}
                   </span>
                   <StatusBadge status={bet.status as BetStatus} />
                 </div>
@@ -66,8 +72,8 @@ export function BetList({ bets, currency, onEdit, onDelete, onSettle }: Props) {
                   ))}
                 </div>
                 <p className="mt-1 font-mono text-xs text-slate-500">
-                  {formatCurrency(bet.stake, currency)} @ {formatOdds(odds, 'decimal')} ·{' '}
-                  {new Date(bet.placed_at).toLocaleDateString('fr-FR')}
+                  {formatCurrency(bet.stake, currency)} @ {formatOdds(odds, oddsFormat)} ·{' '}
+                  {new Date(bet.placed_at).toLocaleDateString(dateLocale)}
                 </p>
               </div>
               <div className="text-right">
@@ -88,19 +94,19 @@ export function BetList({ bets, currency, onEdit, onDelete, onSettle }: Props) {
                     onClick={() => onSettle(bet.id, 'won')}
                     className="rounded-lg border border-win/40 px-2.5 py-1 text-xs font-medium text-win hover:bg-win/10"
                   >
-                    Gagné
+                    {t('betlist.statusWon')}
                   </button>
                   <button
                     onClick={() => onSettle(bet.id, 'lost')}
                     className="rounded-lg border border-loss/40 px-2.5 py-1 text-xs font-medium text-loss hover:bg-loss/10"
                   >
-                    Perdu
+                    {t('betlist.statusLost')}
                   </button>
                   <button
                     onClick={() => onSettle(bet.id, 'push')}
                     className="rounded-lg border border-push/40 px-2.5 py-1 text-xs font-medium text-push hover:bg-push/10"
                   >
-                    Push
+                    {t('betlist.statusPush')}
                   </button>
                 </>
               ) : (
@@ -108,21 +114,21 @@ export function BetList({ bets, currency, onEdit, onDelete, onSettle }: Props) {
                   onClick={() => onSettle(bet.id, 'pending')}
                   className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
                 >
-                  Remettre en attente
+                  {t('betlist.resetPending')}
                 </button>
               )}
               <button
                 onClick={() => onEdit(bet)}
                 className="ml-auto rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
               >
-                Modifier
+                {t('betlist.edit')}
               </button>
               {confirmDeleteId === bet.id ? (
                 <button
                   onClick={() => onDelete(bet.id)}
                   className="rounded-lg border border-loss bg-loss/10 px-2.5 py-1 text-xs font-medium text-loss"
                 >
-                  Confirmer ?
+                  {t('betlist.confirmDelete')}
                 </button>
               ) : (
                 <button
@@ -130,7 +136,7 @@ export function BetList({ bets, currency, onEdit, onDelete, onSettle }: Props) {
                   onBlur={() => setConfirmDeleteId(null)}
                   className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-loss hover:text-loss"
                 >
-                  Supprimer
+                  {t('betlist.delete')}
                 </button>
               )}
             </div>

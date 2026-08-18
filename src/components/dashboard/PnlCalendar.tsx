@@ -10,12 +10,22 @@ import {
   startOfWeek,
   subMonths,
 } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { fr, enUS } from 'date-fns/locale'
 import { formatSignedCurrency } from '../../lib/format'
-
-const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+import { useLocale } from '../../hooks/useLocale'
 
 export function PnlCalendar({ dailyNet, currency }: { dailyNet: Map<string, number>; currency: string }) {
+  const { locale, t } = useLocale()
+  const dateFnsLocale = locale === 'fr' ? fr : enUS
+  const weekdays = [
+    t('calendar.weekday.mon'),
+    t('calendar.weekday.tue'),
+    t('calendar.weekday.wed'),
+    t('calendar.weekday.thu'),
+    t('calendar.weekday.fri'),
+    t('calendar.weekday.sat'),
+    t('calendar.weekday.sun'),
+  ]
   const [month, setMonth] = useState(() => new Date())
 
   const days = useMemo(() => {
@@ -38,13 +48,15 @@ export function PnlCalendar({ dailyNet, currency }: { dailyNet: Map<string, numb
         <button onClick={() => setMonth((m) => subMonths(m, 1))} className="px-2 text-slate-400 hover:text-slate-100">
           ‹
         </button>
-        <p className="font-display text-lg capitalize text-slate-100">{format(month, 'MMMM yyyy', { locale: fr })}</p>
+        <p className="font-display text-lg capitalize text-slate-100">
+          {format(month, 'MMMM yyyy', { locale: dateFnsLocale })}
+        </p>
         <button onClick={() => setMonth((m) => addMonths(m, 1))} className="px-2 text-slate-400 hover:text-slate-100">
           ›
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center">
-        {WEEKDAYS.map((d, i) => (
+        {weekdays.map((d, i) => (
           <span key={i} className="text-[10px] uppercase text-slate-500">
             {d}
           </span>

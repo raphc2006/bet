@@ -2,10 +2,12 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useLocale } from '../hooks/useLocale'
 import { AuthCard, ErrorBanner, FormField } from '../components/auth/AuthCard'
 
 export function SignupPage() {
   const { signUp } = useAuth()
+  const { t } = useLocale()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,7 +20,7 @@ export function SignupPage() {
     setError(null)
 
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-      setError('Le pseudo doit contenir 3 à 20 caractères (lettres, chiffres, underscore).')
+      setError(t('signup.usernameError'))
       return
     }
 
@@ -34,11 +36,11 @@ export function SignupPage() {
 
   if (confirmationSent) {
     return (
-      <AuthCard title="Vérifie ta boîte mail" subtitle="Un email de confirmation vient de t'être envoyé.">
+      <AuthCard title={t('signup.confirmTitle')} subtitle={t('signup.confirmSubtitle')}>
         <p className="mt-6 text-sm text-slate-300">
-          Clique sur le lien reçu par email pour activer ton compte, puis reviens{' '}
+          {t('signup.confirmBody')}{' '}
           <Link to="/login" className="font-medium text-win hover:underline">
-            te connecter
+            {t('signup.confirmLink')}
           </Link>
           .
         </p>
@@ -47,11 +49,11 @@ export function SignupPage() {
   }
 
   return (
-    <AuthCard title="Créer un compte" subtitle="Commence à suivre tes paris sportifs.">
+    <AuthCard title={t('signup.title')} subtitle={t('signup.subtitle')}>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         {error && <ErrorBanner message={error} />}
         <FormField
-          label="Pseudo"
+          label={t('signup.username')}
           type="text"
           autoComplete="username"
           required
@@ -59,7 +61,7 @@ export function SignupPage() {
           onChange={(e) => setUsername(e.target.value)}
         />
         <FormField
-          label="Email"
+          label={t('signup.email')}
           type="email"
           autoComplete="email"
           required
@@ -67,7 +69,7 @@ export function SignupPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
         <FormField
-          label="Mot de passe"
+          label={t('signup.password')}
           type="password"
           autoComplete="new-password"
           minLength={6}
@@ -80,13 +82,13 @@ export function SignupPage() {
           disabled={submitting}
           className="w-full rounded-lg bg-win px-4 py-2 font-display text-lg font-semibold tracking-wide text-charcoal transition hover:brightness-110 disabled:opacity-50"
         >
-          {submitting ? 'Création…' : 'Créer mon compte'}
+          {submitting ? t('signup.submitting') : t('signup.submit')}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-slate-400">
-        Déjà un compte ?{' '}
+        {t('signup.haveAccount')}{' '}
         <Link to="/login" className="font-medium text-win hover:underline">
-          Se connecter
+          {t('signup.login')}
         </Link>
       </p>
     </AuthCard>

@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
+import { Link } from 'react-router-dom'
+import { useProfile } from '../hooks/useProfile'
 import { useBankroll } from '../hooks/useBankroll'
 import { useBets } from '../hooks/useBets'
+import { useLocale } from '../hooks/useLocale'
 import { computeStats, computeDailyNet, computeBalanceSeries, currentBalance } from '../lib/stats'
 import { betsToCsv, downloadCsv } from '../lib/csv'
+import type { OddsFormat } from '../lib/odds'
+import { Header } from '../components/layout/Header'
+import { Avatar } from '../components/layout/Avatar'
 import { BankrollCard } from '../components/dashboard/BankrollCard'
 import { StatsGrid } from '../components/dashboard/StatsGrid'
 import { BetForm } from '../components/dashboard/BetForm'
@@ -19,21 +24,23 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 function Spinner() {
+  const { t } = useLocale()
   return (
     <div className="flex justify-center py-10">
-      <p className="font-mono text-sm text-slate-500">Chargement…</p>
+      <p className="font-mono text-sm text-slate-500">{t('dashboard.loading')}</p>
     </div>
   )
 }
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth()
-  const username = (user?.user_metadata?.username as string | undefined) ?? user?.email
-
+  const { t } = useLocale()
+  const profileState = useProfile()
   const bankrollState = useBankroll()
   const betsState = useBets()
   const [formOpen, setFormOpen] = useState(false)
   const [editingBet, setEditingBet] = useState<Bet | null>(null)
+
+  const oddsFormat = (profileState.profile?.odds_format as OddsFormat | undefined) ?? 'decimal'
 
   const stats = useMemo(() => computeStats(betsState.bets), [betsState.bets])
   const dailyNet = useMemo(
@@ -74,18 +81,11 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-charcoal">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <h1 className="font-display text-2xl font-semibold tracking-wide text-slate-50">BetTracker</h1>
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-sm text-slate-400">{username}</span>
-          <button
-            onClick={() => signOut()}
-            className="rounded-lg border border-border px-3 py-1.5 text-sm text-slate-300 transition hover:border-loss hover:text-loss"
-          >
-            Déconnexion
-          </button>
-        </div>
-      </header>
+      <Header>
+        <Link to="/settings" aria-label={t('nav.settings')}>
+          <Avatar url={profileState.profile?.avatar_url ?? null} username={profileState.profile?.username ?? '?'} />
+        </Link>
+      </Header>
 
       <main className="mx-auto max-w-4xl space-y-6 px-6 py-8">
         {error && <ErrorBanner message={error} />}
@@ -106,20 +106,20 @@ export function DashboardPage() {
               <PnlCalendar dailyNet={dailyNet} currency={bankrollState.bankroll.currency} />
 
               <div className="flex items-center justify-between">
-                <h2 className="font-display text-xl font-semibold text-slate-100">Journal de paris</h2>
+                <h2 className="font-display text-xl font-semibold text-slate-100">{t('dashboard.journal')}</h2>
                 <div className="flex gap-2">
                   <button
                     onClick={handleExportCsv}
                     disabled={betsState.bets.length === 0}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm text-slate-300 transition hover:border-slate-400 disabled:opacity-40"
                   >
-                    Exporter CSV
+                    {t('dashboard.exportCsv')}
                   </button>
                   <button
                     onClick={openCreateForm}
                     className="rounded-lg bg-win px-3 py-1.5 text-sm font-semibold text-charcoal transition hover:brightness-110"
                   >
-                    + Nouveau pari
+                    {t('dashboard.newBet')}
                   </button>
                 </div>
               </div>
@@ -130,6 +130,7 @@ export function DashboardPage() {
                 <BetList
                   bets={betsState.bets}
                   currency={bankrollState.bankroll.currency}
+                  oddsFormat={oddsFormat}
                   onEdit={openEditForm}
                   onDelete={handleDelete}
                   onSettle={betsState.settleBet}
@@ -143,6 +144,7 @@ export function DashboardPage() {
       {formOpen && (
         <BetForm
           bet={editingBet ?? undefined}
+          defaultOddsFormat={oddsFormat}
           onClose={() => setFormOpen(false)}
           onSubmit={editingBet ? (input) => betsState.updateBet(editingBet.id, input) : betsState.createBet}
         />

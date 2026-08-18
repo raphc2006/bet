@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Bankroll } from '../../types/domain'
 import { formatCurrency } from '../../lib/format'
+import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
 
@@ -13,6 +14,7 @@ type Props = {
 }
 
 export function BankrollCard({ bankroll, balance, onUpdateConfig, onAddAdjustment }: Props) {
+  const { t } = useLocale()
   const [editing, setEditing] = useState(false)
   const [adjusting, setAdjusting] = useState(false)
 
@@ -22,12 +24,15 @@ export function BankrollCard({ bankroll, balance, onUpdateConfig, onAddAdjustmen
     <div className="rounded-xl border border-border bg-charcoal-light p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-slate-400">Bankroll actuelle</p>
+          <p className="text-xs uppercase tracking-wide text-slate-400">{t('bankroll.current')}</p>
           <p className="mt-1 font-mono text-3xl font-semibold text-slate-50">
             {formatCurrency(balance, bankroll.currency)}
           </p>
           <p className="mt-1 font-mono text-xs text-slate-500">
-            1 unité = {bankroll.unit_percentage}% = {formatCurrency(unitAmount, bankroll.currency)}
+            {t('bankroll.unit', {
+              pct: bankroll.unit_percentage,
+              amount: formatCurrency(unitAmount, bankroll.currency),
+            })}
           </p>
         </div>
         <div className="flex flex-col gap-2">
@@ -35,13 +40,13 @@ export function BankrollCard({ bankroll, balance, onUpdateConfig, onAddAdjustmen
             onClick={() => setAdjusting(true)}
             className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-win hover:text-win"
           >
-            Dépôt / retrait
+            {t('bankroll.deposit')}
           </button>
           <button
             onClick={() => setEditing(true)}
             className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-400"
           >
-            Configurer
+            {t('bankroll.configure')}
           </button>
         </div>
       </div>
@@ -65,6 +70,7 @@ function ConfigModal({
   onClose: () => void
   onSubmit: Props['onUpdateConfig']
 }) {
+  const { t } = useLocale()
   const [startingAmount, setStartingAmount] = useState(String(bankroll.starting_amount))
   const [unitPercentage, setUnitPercentage] = useState(String(bankroll.unit_percentage))
   const [error, setError] = useState<string | null>(null)
@@ -75,8 +81,8 @@ function ConfigModal({
     setError(null)
     const starting = Number(startingAmount)
     const unit = Number(unitPercentage)
-    if (Number.isNaN(starting) || starting < 0) return setError('Montant de départ invalide.')
-    if (Number.isNaN(unit) || unit <= 0) return setError('Unité de mise invalide.')
+    if (Number.isNaN(starting) || starting < 0) return setError(t('bankroll.startingAmountError'))
+    if (Number.isNaN(unit) || unit <= 0) return setError(t('bankroll.unitError'))
 
     setSubmitting(true)
     const { error } = await onSubmit(starting, unit)
@@ -86,11 +92,11 @@ function ConfigModal({
   }
 
   return (
-    <Modal title="Configurer la bankroll" onClose={onClose}>
+    <Modal title={t('bankroll.configureTitle')} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <p className="text-sm text-loss">{error}</p>}
         <FormField
-          label="Montant de départ"
+          label={t('bankroll.startingAmount')}
           type="number"
           step="0.01"
           min="0"
@@ -98,7 +104,7 @@ function ConfigModal({
           onChange={(e) => setStartingAmount(e.target.value)}
         />
         <FormField
-          label="Unité de mise (%)"
+          label={t('bankroll.unitPercentage')}
           type="number"
           step="0.1"
           min="0.1"
@@ -110,7 +116,7 @@ function ConfigModal({
           disabled={submitting}
           className="w-full rounded-lg bg-win px-4 py-2 font-display text-lg font-semibold text-charcoal transition hover:brightness-110 disabled:opacity-50"
         >
-          {submitting ? 'Enregistrement…' : 'Enregistrer'}
+          {submitting ? t('bankroll.saving') : t('bankroll.save')}
         </button>
       </form>
     </Modal>
@@ -118,6 +124,7 @@ function ConfigModal({
 }
 
 function AdjustmentModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: Props['onAddAdjustment'] }) {
+  const { t } = useLocale()
   const [type, setType] = useState<'deposit' | 'withdraw'>('deposit')
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
@@ -128,7 +135,7 @@ function AdjustmentModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
     e.preventDefault()
     setError(null)
     const value = Number(amount)
-    if (Number.isNaN(value) || value <= 0) return setError('Montant invalide.')
+    if (Number.isNaN(value) || value <= 0) return setError(t('bankroll.amountError'))
 
     setSubmitting(true)
     const { error } = await onSubmit(type === 'deposit' ? value : -value, note)
@@ -138,7 +145,7 @@ function AdjustmentModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
   }
 
   return (
-    <Modal title="Dépôt / retrait" onClose={onClose}>
+    <Modal title={t('bankroll.adjustTitle')} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <p className="text-sm text-loss">{error}</p>}
         <div className="flex gap-2">
@@ -149,7 +156,7 @@ function AdjustmentModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
               type === 'deposit' ? 'border-win bg-win/10 text-win' : 'border-border text-slate-400'
             }`}
           >
-            Dépôt
+            {t('bankroll.depositLabel')}
           </button>
           <button
             type="button"
@@ -158,24 +165,24 @@ function AdjustmentModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
               type === 'withdraw' ? 'border-loss bg-loss/10 text-loss' : 'border-border text-slate-400'
             }`}
           >
-            Retrait
+            {t('bankroll.withdrawLabel')}
           </button>
         </div>
         <FormField
-          label="Montant"
+          label={t('bankroll.amount')}
           type="number"
           step="0.01"
           min="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
-        <FormField label="Note (optionnel)" type="text" value={note} onChange={(e) => setNote(e.target.value)} />
+        <FormField label={t('bankroll.note')} type="text" value={note} onChange={(e) => setNote(e.target.value)} />
         <button
           type="submit"
           disabled={submitting}
           className="w-full rounded-lg bg-win px-4 py-2 font-display text-lg font-semibold text-charcoal transition hover:brightness-110 disabled:opacity-50"
         >
-          {submitting ? 'Enregistrement…' : 'Confirmer'}
+          {submitting ? t('bankroll.saving') : t('bankroll.confirm')}
         </button>
       </form>
     </Modal>

@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import type { Bet, BetType } from '../../types/domain'
 import type { BetInput, LegInput } from '../../hooks/useBets'
 import { formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
+import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
 
@@ -28,12 +29,14 @@ function legsFromBet(bet: Bet, format: OddsFormat): LegFormState[] {
 
 type Props = {
   bet?: Bet
+  defaultOddsFormat?: OddsFormat
   onClose: () => void
   onSubmit: (input: BetInput) => Promise<{ error: string | null }>
 }
 
-export function BetForm({ bet, onClose, onSubmit }: Props) {
-  const [oddsFormat, setOddsFormat] = useState<OddsFormat>('decimal')
+export function BetForm({ bet, defaultOddsFormat = 'decimal', onClose, onSubmit }: Props) {
+  const { t } = useLocale()
+  const [oddsFormat, setOddsFormat] = useState<OddsFormat>(defaultOddsFormat)
   const [betType, setBetType] = useState<BetType>((bet?.bet_type as BetType) ?? 'single')
   const [stake, setStake] = useState(bet ? String(bet.stake) : '')
   const [confidence, setConfidence] = useState(bet?.confidence ? String(bet.confidence) : '')
@@ -41,7 +44,7 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
   const [placedAt, setPlacedAt] = useState(
     bet ? bet.placed_at.slice(0, 16) : new Date().toISOString().slice(0, 16),
   )
-  const [legs, setLegs] = useState<LegFormState[]>(bet ? legsFromBet(bet, oddsFormat) : [emptyLeg()])
+  const [legs, setLegs] = useState<LegFormState[]>(bet ? legsFromBet(bet, defaultOddsFormat) : [emptyLeg()])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -59,7 +62,6 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
 
   function toggleOddsFormat(next: OddsFormat) {
     if (next === oddsFormat) return
-    // Reconvertit les cotes déjà saisies pour ne pas perdre la valeur en changeant de format.
     setLegs((prev) =>
       prev.map((leg) => {
         const decimal = parseOddsInput(leg.oddsInput, oddsFormat)
@@ -79,16 +81,16 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
     setError(null)
 
     const stakeValue = Number(stake)
-    if (Number.isNaN(stakeValue) || stakeValue <= 0) return setError('Mise invalide.')
+    if (Number.isNaN(stakeValue) || stakeValue <= 0) return setError(t('betform.stakeError'))
 
-    if (betType === 'single' && legs.length !== 1) return setError('Un pari simple a un seul événement.')
-    if (betType === 'parlay' && legs.length < 2) return setError('Un parlay nécessite au moins 2 légs.')
+    if (betType === 'single' && legs.length !== 1) return setError(t('betform.singleError'))
+    if (betType === 'parlay' && legs.length < 2) return setError(t('betform.parlayError'))
 
     const parsedLegs: LegInput[] = []
     for (const leg of legs) {
-      if (!leg.event_description.trim()) return setError('Chaque leg doit avoir une description.')
+      if (!leg.event_description.trim()) return setError(t('betform.legDescError'))
       const decimal = parseOddsInput(leg.oddsInput, oddsFormat)
-      if (!decimal) return setError(`Cote invalide pour "${leg.event_description}".`)
+      if (!decimal) return setError(t('betform.oddsError', { event: leg.event_description }))
       const closingDecimal = leg.closingOddsInput ? parseOddsInput(leg.closingOddsInput, oddsFormat) : null
       parsedLegs.push({
         event_description: leg.event_description.trim(),
@@ -113,7 +115,7 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
   }
 
   return (
-    <Modal title={bet ? 'Modifier le pari' : 'Nouveau pari'} onClose={onClose}>
+    <Modal title={bet ? t('betform.editTitle') : t('betform.newTitle')} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <p className="text-sm text-loss">{error}</p>}
 
@@ -125,7 +127,7 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
               betType === 'single' ? 'border-win bg-win/10 text-win' : 'border-border text-slate-400'
             }`}
           >
-            Simple
+            {t('betform.single')}
           </button>
           <button
             type="button"
@@ -134,14 +136,14 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
               betType === 'parlay' ? 'border-win bg-win/10 text-win' : 'border-border text-slate-400'
             }`}
           >
-            Parlay
+            {t('betform.parlay')}
           </button>
           <button
             type="button"
             onClick={() => toggleOddsFormat(oddsFormat === 'decimal' ? 'american' : 'decimal')}
             className="rounded-lg border border-border px-3 py-2 text-xs font-medium text-slate-400 transition hover:text-slate-100"
           >
-            Cotes: {oddsFormat === 'decimal' ? 'Décimal' : 'Américain'}
+            {oddsFormat === 'decimal' ? t('betform.oddsToggleDecimal') : t('betform.oddsToggleAmerican')}
           </button>
         </div>
 
@@ -150,7 +152,7 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
             <div key={i} className="rounded-lg border border-border p-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-wide text-slate-500">
-                  {betType === 'parlay' ? `Leg ${i + 1}` : 'Événement'}
+                  {betType === 'parlay' ? t('betform.leg', { n: i + 1 }) : t('betform.event')}
                 </span>
                 {betType === 'parlay' && legs.length > 2 && (
                   <button
@@ -158,28 +160,28 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
                     onClick={() => removeLeg(i)}
                     className="text-xs text-loss hover:underline"
                   >
-                    Retirer
+                    {t('betform.remove')}
                   </button>
                 )}
               </div>
               <div className="mt-2 space-y-2">
                 <FormField
-                  label="Description"
+                  label={t('betform.description')}
                   type="text"
-                  placeholder="ex: PSG - OM, vainqueur PSG"
+                  placeholder={t('betform.descriptionPlaceholder')}
                   value={leg.event_description}
                   onChange={(e) => updateLeg(i, { event_description: e.target.value })}
                 />
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
-                    label="Marché"
+                    label={t('betform.market')}
                     type="text"
                     placeholder="1X2"
                     value={leg.market}
                     onChange={(e) => updateLeg(i, { market: e.target.value })}
                   />
                   <FormField
-                    label="Cote"
+                    label={t('betform.odds')}
                     type="text"
                     inputMode="decimal"
                     placeholder={oddsFormat === 'decimal' ? '1.85' : '-118'}
@@ -187,10 +189,10 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
                     onChange={(e) => updateLeg(i, { oddsInput: e.target.value })}
                   />
                   <FormField
-                    label="Cote clôture"
+                    label={t('betform.closingOdds')}
                     type="text"
                     inputMode="decimal"
-                    placeholder="optionnel"
+                    placeholder={t('betform.optional')}
                     value={leg.closingOddsInput}
                     onChange={(e) => updateLeg(i, { closingOddsInput: e.target.value })}
                   />
@@ -204,15 +206,22 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
               onClick={addLeg}
               className="w-full rounded-lg border border-dashed border-border py-2 text-sm text-slate-400 transition hover:border-win hover:text-win"
             >
-              + Ajouter un leg
+              {t('betform.addLeg')}
             </button>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <FormField label="Mise" type="number" step="0.01" min="0.01" value={stake} onChange={(e) => setStake(e.target.value)} />
           <FormField
-            label="Confiance (1-5)"
+            label={t('betform.stake')}
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={stake}
+            onChange={(e) => setStake(e.target.value)}
+          />
+          <FormField
+            label={t('betform.confidence')}
             type="number"
             min="1"
             max="5"
@@ -221,19 +230,19 @@ export function BetForm({ bet, onClose, onSubmit }: Props) {
           />
         </div>
         <FormField
-          label="Date"
+          label={t('betform.date')}
           type="datetime-local"
           value={placedAt}
           onChange={(e) => setPlacedAt(e.target.value)}
         />
-        <FormField label="Notes (optionnel)" type="text" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <FormField label={t('betform.notes')} type="text" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
         <button
           type="submit"
           disabled={submitting}
           className="w-full rounded-lg bg-win px-4 py-2 font-display text-lg font-semibold text-charcoal transition hover:brightness-110 disabled:opacity-50"
         >
-          {submitting ? 'Enregistrement…' : bet ? 'Mettre à jour' : 'Ajouter le pari'}
+          {submitting ? t('betform.saving') : bet ? t('betform.update') : t('betform.submit')}
         </button>
       </form>
     </Modal>

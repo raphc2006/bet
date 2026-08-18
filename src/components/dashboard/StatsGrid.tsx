@@ -1,5 +1,6 @@
 import type { Stats } from '../../lib/stats'
 import { formatPercent, formatSignedCurrency } from '../../lib/format'
+import { useLocale } from '../../hooks/useLocale'
 
 function Tile({ label, value, tone }: { label: string; value: string; tone?: 'win' | 'loss' | 'neutral' }) {
   const toneClass = tone === 'win' ? 'text-win' : tone === 'loss' ? 'text-loss' : 'text-slate-100'
@@ -12,15 +13,16 @@ function Tile({ label, value, tone }: { label: string; value: string; tone?: 'wi
 }
 
 export function StatsGrid({ stats, currency }: { stats: Stats; currency: string }) {
+  const { t } = useLocale()
   const profitTone = stats.totalProfit > 0 ? 'win' : stats.totalProfit < 0 ? 'loss' : 'neutral'
   const roiTone = stats.roi === null ? 'neutral' : stats.roi > 0 ? 'win' : stats.roi < 0 ? 'loss' : 'neutral'
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <Tile label="Win rate" value={stats.winRate === null ? '—' : `${stats.winRate.toFixed(1)}%`} />
-      <Tile label="ROI" value={stats.roi === null ? '—' : formatPercent(stats.roi)} tone={roiTone} />
-      <Tile label="Profit total" value={formatSignedCurrency(stats.totalProfit, currency)} tone={profitTone} />
-      <Tile label="CLV moyen" value={stats.avgClv === null ? '—' : formatPercent(stats.avgClv)} />
+      <Tile label={t('stats.winRate')} value={stats.winRate === null ? '—' : `${stats.winRate.toFixed(1)}%`} />
+      <Tile label={t('stats.roi')} value={stats.roi === null ? '—' : formatPercent(stats.roi)} tone={roiTone} />
+      <Tile label={t('stats.totalProfit')} value={formatSignedCurrency(stats.totalProfit, currency)} tone={profitTone} />
+      <Tile label={t('stats.avgClv')} value={stats.avgClv === null ? '—' : formatPercent(stats.avgClv)} />
     </div>
   )
 }
