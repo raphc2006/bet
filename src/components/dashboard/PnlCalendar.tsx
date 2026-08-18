@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek, subMonths } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
-import { formatSignedCurrency } from '../../lib/format'
+import { formatSignedCompact, formatSignedCurrency } from '../../lib/format'
 import { useLocale } from '../../hooks/useLocale'
 
 type Props = {
@@ -68,12 +68,21 @@ export function PnlCalendar({ dailyNet, currency, month, onMonthChange }: Props)
             <div
               key={key}
               title={net !== undefined ? formatSignedCurrency(net, currency) : undefined}
-              className={`flex aspect-square flex-col items-center justify-center rounded-md text-[11px] ${
+              className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-md text-[11px] ${
                 inMonth ? 'text-slate-300' : 'text-slate-700'
               }`}
               style={{ backgroundColor: bg }}
             >
-              {format(day, 'd')}
+              <span>{format(day, 'd')}</span>
+              {net !== undefined && net !== 0 && (
+                <span
+                  className={`font-mono text-[9px] leading-none ${
+                    net > 0 ? 'text-win' : 'text-loss'
+                  } ${inMonth ? '' : 'opacity-50'}`}
+                >
+                  {formatSignedCompact(net, currency)}
+                </span>
+              )}
             </div>
           )
         })}
