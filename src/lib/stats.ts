@@ -66,13 +66,13 @@ export function computeStats(bets: Bet[]): Stats {
 
 export type DailyNet = { date: string; net: number }
 
-/** Regroupe paris réglés + ajustements par jour (clé YYYY-MM-DD) pour le calendrier et le graphique. */
+/** Regroupe paris réglés (par date du pari) + ajustements par jour (clé YYYY-MM-DD) pour le calendrier et le graphique. */
 export function computeDailyNet(bets: Bet[], adjustments: BankrollAdjustment[]): Map<string, number> {
   const byDay = new Map<string, number>()
 
   for (const bet of bets) {
-    if (!isSettled(bet) || !bet.settled_at) continue
-    const day = format(new Date(bet.settled_at), 'yyyy-MM-dd')
+    if (!isSettled(bet)) continue
+    const day = format(new Date(bet.placed_at), 'yyyy-MM-dd')
     byDay.set(day, (byDay.get(day) ?? 0) + betProfit(bet))
   }
 
