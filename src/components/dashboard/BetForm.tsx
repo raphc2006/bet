@@ -7,21 +7,25 @@ import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
 
+const LEAGUES = ['MLB', 'NBA', 'NFL', 'NHL'] as const
+
 type LegFormState = {
   event_description: string
   market: string
+  league: string
   oddsInput: string
   closingOddsInput: string
 }
 
 function emptyLeg(): LegFormState {
-  return { event_description: '', market: '', oddsInput: '', closingOddsInput: '' }
+  return { event_description: '', market: '', league: '', oddsInput: '', closingOddsInput: '' }
 }
 
 function legsFromBet(bet: Bet, format: OddsFormat): LegFormState[] {
   return bet.bet_legs.map((leg) => ({
     event_description: leg.event_description,
     market: leg.market ?? '',
+    league: leg.league ?? '',
     oddsInput: formatOdds(leg.odds_decimal, format),
     closingOddsInput: leg.closing_odds_decimal ? formatOdds(leg.closing_odds_decimal, format) : '',
   }))
@@ -103,6 +107,7 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
       parsedLegs.push({
         event_description: leg.event_description.trim(),
         market: leg.market.trim(),
+        league: leg.league || null,
         odds_decimal: decimal,
         closing_odds_decimal: closingDecimal,
       })
@@ -180,7 +185,24 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
                   value={leg.event_description}
                   onChange={(e) => updateLeg(i, { event_description: e.target.value })}
                 />
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                      {t('betform.league')}
+                    </span>
+                    <select
+                      value={leg.league}
+                      onChange={(e) => updateLeg(i, { league: e.target.value })}
+                      className="w-full rounded-lg border border-border bg-charcoal-lighter px-3 py-2 font-mono text-sm text-slate-100 outline-none transition focus:border-win focus:ring-1 focus:ring-win"
+                    >
+                      <option value="">{t('betform.leagueNone')}</option>
+                      {LEAGUES.map((league) => (
+                        <option key={league} value={league}>
+                          {league}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <FormField
                     label={t('betform.market')}
                     type="text"
@@ -188,6 +210,8 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
                     value={leg.market}
                     onChange={(e) => updateLeg(i, { market: e.target.value })}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <FormField
                     label={t('betform.odds')}
                     type="text"

@@ -6,6 +6,7 @@ import type { Bet, BetStatus, BetType } from '../types/domain'
 export type LegInput = {
   event_description: string
   market: string
+  league: string | null
   odds_decimal: number
   closing_odds_decimal: number | null
 }
@@ -53,6 +54,7 @@ export function useBets() {
       sort_order: i,
       event_description: leg.event_description,
       market: leg.market || null,
+      league: leg.league,
       odds_decimal: leg.odds_decimal,
       closing_odds_decimal: leg.closing_odds_decimal,
     }))

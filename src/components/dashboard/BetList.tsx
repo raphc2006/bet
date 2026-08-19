@@ -67,6 +67,11 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
                 <div className="mt-1 space-y-0.5">
                   {bet.bet_legs.map((leg) => (
                     <p key={leg.id} className="text-sm text-slate-200">
+                      {leg.league && (
+                        <span className="mr-1.5 rounded border border-border px-1 py-0.5 font-mono text-[10px] uppercase text-slate-400">
+                          {leg.league}
+                        </span>
+                      )}
                       {leg.event_description}
                       {leg.market && <span className="text-slate-500"> · {leg.market}</span>}
                     </p>
