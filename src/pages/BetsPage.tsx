@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { addDays, format, isToday, subDays } from 'date-fns'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { addDays, format, isToday, isValid, parseISO, subDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { useProfile } from '../hooks/useProfile'
 import { useBankroll } from '../hooks/useBankroll'
@@ -26,11 +26,34 @@ export function BetsPage() {
   const bankrollState = useBankroll()
   const betsState = useBets()
 
-  const [selectedDate, setSelectedDate] = useState(() => new Date())
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const param = searchParams.get('date')
+    if (param) {
+      const parsed = parseISO(param)
+      if (isValid(parsed)) return parsed
+    }
+    return new Date()
+  })
   const [formOpen, setFormOpen] = useState(false)
   const [editingBet, setEditingBet] = useState<Bet | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<BetFilters>({})
+
+  useEffect(() => {
+    const param = searchParams.get('date')
+    if (!param) return
+    const parsed = parseISO(param)
+    if (isValid(parsed)) {
+      setSelectedDate(parsed)
+      setFilters({})
+    }
+    setSearchParams((prev) => {
+      prev.delete('date')
+      return prev
+    }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const oddsFormat = (profileState.profile?.odds_format as OddsFormat | undefined) ?? 'decimal'
   const currency = bankrollState.bankroll?.currency ?? 'EUR'

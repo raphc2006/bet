@@ -9,9 +9,10 @@ type Props = {
   currency: string
   month: Date
   onMonthChange: (month: Date) => void
+  onDayClick?: (day: Date) => void
 }
 
-export function PnlCalendar({ dailyNet, currency, month, onMonthChange }: Props) {
+export function PnlCalendar({ dailyNet, currency, month, onMonthChange, onDayClick }: Props) {
   const { locale, t } = useLocale()
   const dateFnsLocale = locale === 'fr' ? fr : enUS
   const weekdays = [
@@ -65,12 +66,14 @@ export function PnlCalendar({ dailyNet, currency, month, onMonthChange }: Props)
           const bg = net === undefined ? 'transparent' : net > 0 ? `rgba(62,207,110,${opacity})` : net < 0 ? `rgba(224,85,79,${opacity})` : 'transparent'
 
           return (
-            <div
+            <button
               key={key}
+              type="button"
+              onClick={() => onDayClick?.(day)}
               title={net !== undefined ? formatSignedCurrency(net, currency) : undefined}
-              className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-md text-[11px] ${
+              className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-md text-[11px] transition ${
                 inMonth ? 'text-slate-300' : 'text-slate-700'
-              }`}
+              } ${onDayClick ? 'cursor-pointer hover:ring-1 hover:ring-slate-500' : ''}`}
               style={{ backgroundColor: bg }}
             >
               <span>{format(day, 'd')}</span>
@@ -83,7 +86,7 @@ export function PnlCalendar({ dailyNet, currency, month, onMonthChange }: Props)
                   {formatSignedCompact(net, currency)}
                 </span>
               )}
-            </div>
+            </button>
           )
         })}
       </div>

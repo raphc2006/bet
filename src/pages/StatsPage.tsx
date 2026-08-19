@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { addWeeks, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subWeeks } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { useProfile } from '../hooks/useProfile'
@@ -19,6 +19,7 @@ import { SportIcon } from '../components/ui/SportIcon'
 export function StatsPage() {
   const { t, locale } = useLocale()
   const dateFnsLocale = locale === 'fr' ? fr : enUS
+  const navigate = useNavigate()
   const profileState = useProfile()
   const bankrollState = useBankroll()
   const betsState = useBets()
@@ -61,6 +62,10 @@ export function StatsPage() {
     [filteredBets, weekStart, weekEnd],
   )
   const weekLabel = `${format(weekStart, 'd MMM', { locale: dateFnsLocale })} – ${format(weekEnd, 'd MMM yyyy', { locale: dateFnsLocale })}`
+
+  function goToDay(day: Date) {
+    navigate(`/bets?date=${format(day, 'yyyy-MM-dd')}`)
+  }
 
   const loading = bankrollState.loading && !bankrollState.bankroll
 
@@ -179,7 +184,13 @@ export function StatsPage() {
           <>
             <section className="space-y-3">
               <h2 className="font-display text-lg font-semibold text-slate-100">{t('stats.thisMonth')}</h2>
-              <PnlCalendar dailyNet={dailyNet} currency={currency} month={month} onMonthChange={setMonth} />
+              <PnlCalendar
+                dailyNet={dailyNet}
+                currency={currency}
+                month={month}
+                onMonthChange={setMonth}
+                onDayClick={goToDay}
+              />
               <StatsGrid stats={monthStats} currency={currency} />
             </section>
 
