@@ -6,3 +6,6 @@ export const MARKET_TYPES = [
   { value: 'moneyline', label: 'Moneyline (ML)', keywords: ['moneyline', 'money line', 'ml'] },
   { value: 'prop', label: 'Prop', keywords: ['prop'] },
 ] as const
+
+/** Options du sélecteur de marché dans le formulaire de pari. */
+export const MARKET_OPTIONS = ['Spread', 'Total', 'Moneyline', 'Prop', 'Autre'] as const
