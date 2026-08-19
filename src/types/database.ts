@@ -51,6 +51,7 @@ export type Database = {
       bankrolls: {
         Row: {
           currency: string
+          goal_amount: number | null
           starting_amount: number
           unit_percentage: number
           updated_at: string
@@ -58,6 +59,7 @@ export type Database = {
         }
         Insert: {
           currency?: string
+          goal_amount?: number | null
           starting_amount?: number
           unit_percentage?: number
           updated_at?: string
@@ -65,6 +67,7 @@ export type Database = {
         }
         Update: {
           currency?: string
+          goal_amount?: number | null
           starting_amount?: number
           unit_percentage?: number
           updated_at?: string

@@ -9,7 +9,11 @@ import { FormField } from '../auth/AuthCard'
 type Props = {
   bankroll: Bankroll
   balance: number
-  onUpdateConfig: (startingAmount: number, unitPercentage: number) => Promise<{ error: string | null }>
+  onUpdateConfig: (
+    startingAmount: number,
+    unitPercentage: number,
+    goalAmount: number | null,
+  ) => Promise<{ error: string | null }>
   onAddAdjustment: (amount: number, note: string) => Promise<{ error: string | null }>
 }
 
@@ -19,6 +23,8 @@ export function BankrollCard({ bankroll, balance, onUpdateConfig, onAddAdjustmen
   const [adjusting, setAdjusting] = useState(false)
 
   const unitAmount = balance * (bankroll.unit_percentage / 100)
+  const goal = bankroll.goal_amount
+  const goalProgress = goal ? Math.max(0, Math.min(100, (balance / goal) * 100)) : null
 
   return (
     <div className="rounded-xl border border-border bg-charcoal-light p-5">
@@ -51,6 +57,24 @@ export function BankrollCard({ bankroll, balance, onUpdateConfig, onAddAdjustmen
         </div>
       </div>
 
+      {goal && goalProgress !== null && (
+        <div className="mt-4">
+          <div className="flex items-baseline justify-between">
+            <p className="text-xs uppercase tracking-wide text-slate-400">{t('bankroll.goal')}</p>
+            <p className="font-mono text-xs text-slate-400">
+              {formatCurrency(balance, bankroll.currency)} / {formatCurrency(goal, bankroll.currency)} (
+              {goalProgress.toFixed(0)}%)
+            </p>
+          </div>
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-charcoal-lighter">
+            <div
+              className={`h-full rounded-full transition-all ${goalProgress >= 100 ? 'bg-win' : 'bg-win/70'}`}
+              style={{ width: `${goalProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {editing && (
         <ConfigModal bankroll={bankroll} onClose={() => setEditing(false)} onSubmit={onUpdateConfig} />
       )}
@@ -73,6 +97,7 @@ function ConfigModal({
   const { t } = useLocale()
   const [startingAmount, setStartingAmount] = useState(String(bankroll.starting_amount))
   const [unitPercentage, setUnitPercentage] = useState(String(bankroll.unit_percentage))
+  const [goalAmount, setGoalAmount] = useState(bankroll.goal_amount ? String(bankroll.goal_amount) : '')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -84,8 +109,14 @@ function ConfigModal({
     if (Number.isNaN(starting) || starting < 0) return setError(t('bankroll.startingAmountError'))
     if (Number.isNaN(unit) || unit <= 0) return setError(t('bankroll.unitError'))
 
+    let goal: number | null = null
+    if (goalAmount.trim()) {
+      goal = Number(goalAmount)
+      if (Number.isNaN(goal) || goal <= 0) return setError(t('bankroll.goalError'))
+    }
+
     setSubmitting(true)
-    const { error } = await onSubmit(starting, unit)
+    const { error } = await onSubmit(starting, unit, goal)
     setSubmitting(false)
     if (error) return setError(error)
     onClose()
@@ -110,6 +141,15 @@ function ConfigModal({
           min="0.1"
           value={unitPercentage}
           onChange={(e) => setUnitPercentage(e.target.value)}
+        />
+        <FormField
+          label={t('bankroll.goal')}
+          type="number"
+          step="0.01"
+          min="0.01"
+          placeholder={t('bankroll.goalPlaceholder')}
+          value={goalAmount}
+          onChange={(e) => setGoalAmount(e.target.value)}
         />
         <button
           type="submit"

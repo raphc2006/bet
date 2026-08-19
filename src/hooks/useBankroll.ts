@@ -63,11 +63,11 @@ export function useBankroll() {
     load()
   }, [load])
 
-  async function updateConfig(startingAmount: number, unitPercentage: number) {
+  async function updateConfig(startingAmount: number, unitPercentage: number, goalAmount: number | null) {
     if (!user) return { error: 'Non connecté.' }
     const { data, error } = await supabase
       .from('bankrolls')
-      .update({ starting_amount: startingAmount, unit_percentage: unitPercentage })
+      .update({ starting_amount: startingAmount, unit_percentage: unitPercentage, goal_amount: goalAmount })
       .eq('user_id', user.id)
       .select('*')
       .single()
