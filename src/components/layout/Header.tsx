@@ -32,6 +32,7 @@ export function Header({ children }: { children?: ReactNode }) {
         <TabLink to="/" label={t('nav.dashboard')} />
         <TabLink to="/stats" label={t('nav.stats')} />
         <TabLink to="/bets" label={t('nav.bets')} />
+        <TabLink to="/friends" label={t('nav.friends')} />
       </nav>
     </header>
   )

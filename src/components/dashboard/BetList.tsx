@@ -30,13 +30,14 @@ type Props = {
   bets: Bet[]
   currency: string
   oddsFormat: OddsFormat
-  onEdit: (bet: Bet) => void
-  onDelete: (betId: string) => void
-  onSettle: (betId: string, status: BetStatus) => void
+  onEdit?: (bet: Bet) => void
+  onDelete?: (betId: string) => void
+  onSettle?: (betId: string, status: BetStatus) => void
   emptyMessage?: string
+  readOnly?: boolean
 }
 
-export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle, emptyMessage }: Props) {
+export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle, emptyMessage, readOnly }: Props) {
   const { t, locale } = useLocale()
   const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US'
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -93,59 +94,61 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-              {bet.status === 'pending' ? (
-                <>
+            {!readOnly && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+                {bet.status === 'pending' ? (
+                  <>
+                    <button
+                      onClick={() => onSettle?.(bet.id, 'won')}
+                      className="rounded-lg border border-win/40 px-2.5 py-1 text-xs font-medium text-win hover:bg-win/10"
+                    >
+                      {t('betlist.statusWon')}
+                    </button>
+                    <button
+                      onClick={() => onSettle?.(bet.id, 'lost')}
+                      className="rounded-lg border border-loss/40 px-2.5 py-1 text-xs font-medium text-loss hover:bg-loss/10"
+                    >
+                      {t('betlist.statusLost')}
+                    </button>
+                    <button
+                      onClick={() => onSettle?.(bet.id, 'push')}
+                      className="rounded-lg border border-push/40 px-2.5 py-1 text-xs font-medium text-push hover:bg-push/10"
+                    >
+                      {t('betlist.statusPush')}
+                    </button>
+                  </>
+                ) : (
                   <button
-                    onClick={() => onSettle(bet.id, 'won')}
-                    className="rounded-lg border border-win/40 px-2.5 py-1 text-xs font-medium text-win hover:bg-win/10"
+                    onClick={() => onSettle?.(bet.id, 'pending')}
+                    className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
                   >
-                    {t('betlist.statusWon')}
+                    {t('betlist.resetPending')}
                   </button>
+                )}
+                <button
+                  onClick={() => onEdit?.(bet)}
+                  className="ml-auto rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
+                >
+                  {t('betlist.edit')}
+                </button>
+                {confirmDeleteId === bet.id ? (
                   <button
-                    onClick={() => onSettle(bet.id, 'lost')}
-                    className="rounded-lg border border-loss/40 px-2.5 py-1 text-xs font-medium text-loss hover:bg-loss/10"
+                    onClick={() => onDelete?.(bet.id)}
+                    className="rounded-lg border border-loss bg-loss/10 px-2.5 py-1 text-xs font-medium text-loss"
                   >
-                    {t('betlist.statusLost')}
+                    {t('betlist.confirmDelete')}
                   </button>
+                ) : (
                   <button
-                    onClick={() => onSettle(bet.id, 'push')}
-                    className="rounded-lg border border-push/40 px-2.5 py-1 text-xs font-medium text-push hover:bg-push/10"
+                    onClick={() => setConfirmDeleteId(bet.id)}
+                    onBlur={() => setConfirmDeleteId(null)}
+                    className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-loss hover:text-loss"
                   >
-                    {t('betlist.statusPush')}
+                    {t('betlist.delete')}
                   </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => onSettle(bet.id, 'pending')}
-                  className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
-                >
-                  {t('betlist.resetPending')}
-                </button>
-              )}
-              <button
-                onClick={() => onEdit(bet)}
-                className="ml-auto rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
-              >
-                {t('betlist.edit')}
-              </button>
-              {confirmDeleteId === bet.id ? (
-                <button
-                  onClick={() => onDelete(bet.id)}
-                  className="rounded-lg border border-loss bg-loss/10 px-2.5 py-1 text-xs font-medium text-loss"
-                >
-                  {t('betlist.confirmDelete')}
-                </button>
-              ) : (
-                <button
-                  onClick={() => setConfirmDeleteId(bet.id)}
-                  onBlur={() => setConfirmDeleteId(null)}
-                  className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-loss hover:text-loss"
-                >
-                  {t('betlist.delete')}
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )
       })}

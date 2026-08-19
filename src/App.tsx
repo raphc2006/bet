@@ -8,6 +8,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { StatsPage } from './pages/StatsPage'
 import { BetsPage } from './pages/BetsPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { FriendsPage } from './pages/FriendsPage'
+import { FriendProfilePage } from './pages/FriendProfilePage'
 
 export default function App() {
   return (
@@ -38,6 +40,22 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <BetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/friends"
+              element={
+                <ProtectedRoute>
+                  <FriendsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/friends/:userId"
+              element={
+                <ProtectedRoute>
+                  <FriendProfilePage />
                 </ProtectedRoute>
               }
             />
