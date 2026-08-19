@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Bet, BetType } from '../../types/domain'
 import type { BetInput, LegInput } from '../../hooks/useBets'
-import { formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
+import { combinedDecimalOdds, formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
 import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
@@ -62,8 +62,30 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
     return new Date().toISOString().slice(0, 16)
   })
   const [legs, setLegs] = useState<LegFormState[]>(bet ? legsFromBet(bet, defaultOddsFormat) : [emptyLeg()])
+  const [finalOddsOverride, setFinalOddsOverride] = useState(Boolean(bet?.final_odds_decimal))
+  const [finalOddsInput, setFinalOddsInput] = useState(() =>
+    bet?.final_odds_decimal ? formatOdds(bet.final_odds_decimal, defaultOddsFormat) : '',
+  )
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  function computedParlayOdds(): number | null {
+    const decimals = legs
+      .map((leg) => parseOddsInput(leg.oddsInput, oddsFormat))
+      .filter((d): d is number => d !== null)
+    if (decimals.length === 0) return null
+    return combinedDecimalOdds(decimals)
+  }
+
+  function handleToggleFinalOdds(checked: boolean) {
+    setFinalOddsOverride(checked)
+    if (checked) {
+      const computed = computedParlayOdds()
+      setFinalOddsInput(computed ? formatOdds(computed, oddsFormat) : '')
+    } else {
+      setFinalOddsInput('')
+    }
+  }
 
   function updateLeg(index: number, patch: Partial<LegFormState>) {
     setLegs((prev) => prev.map((leg, i) => (i === index ? { ...leg, ...patch } : leg)))
@@ -90,6 +112,10 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
         }
       }),
     )
+    if (finalOddsOverride) {
+      const decimal = parseOddsInput(finalOddsInput, oddsFormat)
+      setFinalOddsInput(decimal ? formatOdds(decimal, next) : finalOddsInput)
+    }
     setOddsFormat(next)
   }
 
@@ -102,6 +128,12 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
 
     if (betType === 'single' && legs.length !== 1) return setError(t('betform.singleError'))
     if (betType === 'parlay' && legs.length < 2) return setError(t('betform.parlayError'))
+
+    let finalOddsDecimal: number | null = null
+    if (betType === 'parlay' && finalOddsOverride) {
+      finalOddsDecimal = parseOddsInput(finalOddsInput, oddsFormat)
+      if (!finalOddsDecimal) return setError(t('betform.finalOddsError'))
+    }
 
     const parsedLegs: LegInput[] = []
     for (const leg of legs) {
@@ -126,6 +158,7 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
       confidence: confidence ? Number(confidence) : null,
       notes,
       placed_at: new Date(placedAt).toISOString(),
+      final_odds_decimal: finalOddsDecimal,
       legs: parsedLegs,
     })
     setSubmitting(false)
@@ -141,7 +174,10 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => setBetType('single')}
+            onClick={() => {
+              setBetType('single')
+              handleToggleFinalOdds(false)
+            }}
             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
               betType === 'single' ? 'border-win bg-win/10 text-win' : 'border-border text-slate-400'
             }`}
@@ -268,6 +304,40 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
             </button>
           )}
         </div>
+
+        {betType === 'parlay' && (
+          <div className="rounded-lg border border-border p-3">
+            <label className="flex items-center gap-2 text-sm text-slate-300">
+              <input
+                type="checkbox"
+                checked={finalOddsOverride}
+                onChange={(e) => handleToggleFinalOdds(e.target.checked)}
+                className="accent-win"
+              />
+              {t('betform.finalOddsToggle')}
+            </label>
+            {finalOddsOverride && (
+              <div className="mt-2">
+                <FormField
+                  label={t('betform.finalOdds')}
+                  type="text"
+                  inputMode="decimal"
+                  placeholder={oddsFormat === 'decimal' ? '4.50' : '+350'}
+                  value={finalOddsInput}
+                  onChange={(e) => setFinalOddsInput(e.target.value)}
+                />
+                {(() => {
+                  const computed = computedParlayOdds()
+                  return computed ? (
+                    <p className="mt-1 text-xs text-slate-500">
+                      {t('betform.finalOddsComputed', { odds: formatOdds(computed, oddsFormat) })}
+                    </p>
+                  ) : null
+                })()}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-2">
           <FormField

@@ -3,7 +3,9 @@ import type { Bet, BankrollAdjustment } from '../types/domain'
 import { combinedDecimalOdds } from './odds'
 import { MARKET_TYPES } from './constants'
 
+/** Cote décimale du pari : la cote finale saisie manuellement si présente, sinon le produit des cotes des légs. */
 export function betDecimalOdds(bet: Bet): number {
+  if (bet.final_odds_decimal) return bet.final_odds_decimal
   return combinedDecimalOdds(bet.bet_legs.map((leg) => leg.odds_decimal))
 }
 

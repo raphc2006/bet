@@ -132,6 +132,7 @@ export type Database = {
           bet_type: string
           confidence: number | null
           created_at: string
+          final_odds_decimal: number | null
           id: string
           notes: string | null
           placed_at: string
@@ -145,6 +146,7 @@ export type Database = {
           bet_type?: string
           confidence?: number | null
           created_at?: string
+          final_odds_decimal?: number | null
           id?: string
           notes?: string | null
           placed_at?: string
@@ -158,6 +160,7 @@ export type Database = {
           bet_type?: string
           confidence?: number | null
           created_at?: string
+          final_odds_decimal?: number | null
           id?: string
           notes?: string | null
           placed_at?: string

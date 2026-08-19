@@ -17,6 +17,7 @@ export type BetInput = {
   confidence: number | null
   notes: string
   placed_at: string
+  final_odds_decimal: number | null
   legs: LegInput[]
 }
 
@@ -71,6 +72,7 @@ export function useBets() {
         confidence: input.confidence,
         notes: input.notes || null,
         placed_at: input.placed_at,
+        final_odds_decimal: input.final_odds_decimal,
       })
       .select('*')
       .single()
@@ -92,6 +94,7 @@ export function useBets() {
         confidence: input.confidence,
         notes: input.notes || null,
         placed_at: input.placed_at,
+        final_odds_decimal: input.final_odds_decimal,
       })
       .eq('id', betId)
     if (betError) return { error: betError.message }
