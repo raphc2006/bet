@@ -11,7 +11,7 @@ import { SettingsPage } from './pages/SettingsPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/bet">
       <LocaleProvider>
         <AuthProvider>
           <Routes>
