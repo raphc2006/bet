@@ -6,8 +6,7 @@ import { formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
 import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
-
-const LEAGUES = ['MLB', 'NBA', 'NFL', 'NHL', 'Soccer', 'Tennis'] as const
+import { LEAGUES } from '../../lib/constants'
 
 type LegFormState = {
   event_description: string

@@ -6,8 +6,10 @@ import { useProfile } from '../hooks/useProfile'
 import { useBankroll } from '../hooks/useBankroll'
 import { useBets } from '../hooks/useBets'
 import { useLocale } from '../hooks/useLocale'
-import { betsOnDay } from '../lib/stats'
+import { betsOnDay, filterBets } from '../lib/stats'
+import type { BetFilters } from '../lib/stats'
 import { betsToCsv, downloadCsv } from '../lib/csv'
+import { LEAGUES, MARKET_TYPES } from '../lib/constants'
 import type { OddsFormat } from '../lib/odds'
 import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
@@ -26,11 +28,27 @@ export function BetsPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date())
   const [formOpen, setFormOpen] = useState(false)
   const [editingBet, setEditingBet] = useState<Bet | null>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [filters, setFilters] = useState<BetFilters>({})
 
   const oddsFormat = (profileState.profile?.odds_format as OddsFormat | undefined) ?? 'decimal'
   const currency = bankrollState.bankroll?.currency ?? 'EUR'
 
+  const hasActiveFilters = Boolean(
+    filters.league || filters.marketType || filters.text || filters.dateFrom || filters.dateTo,
+  )
+
   const dayBets = useMemo(() => betsOnDay(betsState.bets, selectedDate), [betsState.bets, selectedDate])
+  const filteredBets = useMemo(() => filterBets(betsState.bets, filters), [betsState.bets, filters])
+  const visibleBets = hasActiveFilters ? filteredBets : dayBets
+
+  function updateFilter<K extends keyof BetFilters>(key: K, value: BetFilters[K]) {
+    setFilters((prev) => ({ ...prev, [key]: value || undefined }))
+  }
+
+  function resetFilters() {
+    setFilters({})
+  }
 
   const dayLabel = isToday(selectedDate)
     ? `${t('bets.today')} · ${format(selectedDate, 'd MMMM yyyy', { locale: dateFnsLocale })}`
@@ -84,7 +102,7 @@ export function BetsPage() {
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className={`space-y-2 ${hasActiveFilters ? 'pointer-events-none opacity-40' : ''}`}>
           <DateNav
             label={dayLabel}
             onPrev={() => setSelectedDate((d) => subDays(d, 1))}
@@ -108,17 +126,114 @@ export function BetsPage() {
           )}
         </div>
 
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setFiltersOpen((open) => !open)}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                filtersOpen || hasActiveFilters
+                  ? 'border-win bg-win/10 text-win'
+                  : 'border-border text-slate-300 hover:border-slate-400'
+              }`}
+            >
+              {t('bets.filters')}
+            </button>
+            {hasActiveFilters && (
+              <button onClick={resetFilters} className="text-xs text-slate-400 hover:text-slate-100">
+                {t('bets.filtersReset')}
+              </button>
+            )}
+          </div>
+
+          {filtersOpen && (
+            <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-charcoal-light p-4 sm:grid-cols-4">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                  {t('bets.filterLeague')}
+                </span>
+                <select
+                  value={filters.league ?? ''}
+                  onChange={(e) => updateFilter('league', e.target.value)}
+                  className="w-full rounded-lg border border-border bg-charcoal-lighter px-2 py-1.5 font-mono text-xs text-slate-100 outline-none focus:border-win"
+                >
+                  <option value="">{t('bets.filterAll')}</option>
+                  {LEAGUES.map((league) => (
+                    <option key={league} value={league}>
+                      {league}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                  {t('bets.filterMarketType')}
+                </span>
+                <select
+                  value={filters.marketType ?? ''}
+                  onChange={(e) => updateFilter('marketType', e.target.value)}
+                  className="w-full rounded-lg border border-border bg-charcoal-lighter px-2 py-1.5 font-mono text-xs text-slate-100 outline-none focus:border-win"
+                >
+                  <option value="">{t('bets.filterAll')}</option>
+                  {MARKET_TYPES.map((mt) => (
+                    <option key={mt.value} value={mt.value}>
+                      {mt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                  {t('bets.filterDateFrom')}
+                </span>
+                <input
+                  type="date"
+                  value={filters.dateFrom ?? ''}
+                  onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                  className="w-full rounded-lg border border-border bg-charcoal-lighter px-2 py-1.5 font-mono text-xs text-slate-100 outline-none focus:border-win"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                  {t('bets.filterDateTo')}
+                </span>
+                <input
+                  type="date"
+                  value={filters.dateTo ?? ''}
+                  onChange={(e) => updateFilter('dateTo', e.target.value)}
+                  className="w-full rounded-lg border border-border bg-charcoal-lighter px-2 py-1.5 font-mono text-xs text-slate-100 outline-none focus:border-win"
+                />
+              </label>
+              <label className="col-span-2 block sm:col-span-4">
+                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                  {t('bets.filterText')}
+                </span>
+                <input
+                  type="text"
+                  value={filters.text ?? ''}
+                  onChange={(e) => updateFilter('text', e.target.value)}
+                  placeholder={t('bets.filterTextPlaceholder')}
+                  className="w-full rounded-lg border border-border bg-charcoal-lighter px-3 py-1.5 font-mono text-xs text-slate-100 outline-none focus:border-win"
+                />
+              </label>
+            </div>
+          )}
+
+          {hasActiveFilters && (
+            <p className="font-mono text-xs text-slate-500">{t('bets.filterResults', { n: filteredBets.length })}</p>
+          )}
+        </div>
+
         {loading ? (
           <p className="font-mono text-sm text-slate-500">{t('dashboard.loading')}</p>
         ) : (
           <BetList
-            bets={dayBets}
+            bets={visibleBets}
             currency={currency}
             oddsFormat={oddsFormat}
             onEdit={openEditForm}
             onDelete={handleDelete}
             onSettle={betsState.settleBet}
-            emptyMessage={t('bets.noBetsForDay')}
+            emptyMessage={hasActiveFilters ? t('bets.noFilterResults') : t('bets.noBetsForDay')}
           />
         )}
       </main>

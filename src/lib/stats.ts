@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 import type { Bet, BankrollAdjustment } from '../types/domain'
 import { combinedDecimalOdds } from './odds'
+import { MARKET_TYPES } from './constants'
 
 export function betDecimalOdds(bet: Bet): number {
   return combinedDecimalOdds(bet.bet_legs.map((leg) => leg.odds_decimal))
@@ -121,4 +122,45 @@ export function betsOnDay(bets: Bet[], day: Date): Bet[] {
   const end = new Date(day)
   end.setHours(23, 59, 59, 999)
   return betsInRange(bets, start, end)
+}
+
+export type BetFilters = {
+  league?: string
+  marketType?: string
+  text?: string
+  dateFrom?: string
+  dateTo?: string
+}
+
+/** Filtre le journal par ligue, type de marché, texte libre et plage de dates (dateFrom/dateTo au format YYYY-MM-DD). */
+export function filterBets(bets: Bet[], filters: BetFilters): Bet[] {
+  const text = filters.text?.trim().toLowerCase()
+  const marketKeywords = MARKET_TYPES.find((m) => m.value === filters.marketType)?.keywords
+
+  return bets.filter((bet) => {
+    if (filters.league && !bet.bet_legs.some((leg) => leg.league === filters.league)) return false
+
+    if (marketKeywords) {
+      const matchesMarket = bet.bet_legs.some((leg) => {
+        const market = leg.market?.toLowerCase() ?? ''
+        return marketKeywords.some((kw) => market.includes(kw))
+      })
+      if (!matchesMarket) return false
+    }
+
+    if (filters.dateFrom || filters.dateTo) {
+      const betDay = format(new Date(bet.placed_at), 'yyyy-MM-dd')
+      if (filters.dateFrom && betDay < filters.dateFrom) return false
+      if (filters.dateTo && betDay > filters.dateTo) return false
+    }
+
+    if (text) {
+      const haystack = [bet.notes ?? '', ...bet.bet_legs.map((leg) => `${leg.event_description} ${leg.market ?? ''}`)]
+        .join(' ')
+        .toLowerCase()
+      if (!haystack.includes(text)) return false
+    }
+
+    return true
+  })
 }
