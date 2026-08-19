@@ -43,8 +43,6 @@ export function StatsPage() {
   )
   const weekLabel = `${format(weekStart, 'd MMM', { locale: dateFnsLocale })} – ${format(weekEnd, 'd MMM yyyy', { locale: dateFnsLocale })}`
 
-  const generalStats = useMemo(() => computeStats(betsState.bets), [betsState.bets])
-
   const loading = bankrollState.loading && !bankrollState.bankroll
 
   return (
@@ -72,11 +70,6 @@ export function StatsPage() {
               <h2 className="font-display text-lg font-semibold text-slate-100">{t('stats.thisWeek')}</h2>
               <DateNav label={weekLabel} onPrev={() => setWeek((w) => subWeeks(w, 1))} onNext={() => setWeek((w) => addWeeks(w, 1))} />
               <StatsGrid stats={weekStats} currency={currency} />
-            </section>
-
-            <section className="space-y-3">
-              <h2 className="font-display text-lg font-semibold text-slate-100">{t('stats.general')}</h2>
-              <StatsGrid stats={generalStats} currency={currency} />
             </section>
           </>
         )}
