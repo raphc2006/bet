@@ -16,6 +16,7 @@ import { Avatar } from '../components/layout/Avatar'
 import { BetForm } from '../components/dashboard/BetForm'
 import { BetList } from '../components/dashboard/BetList'
 import { DateNav } from '../components/ui/DateNav'
+import { SportIcon } from '../components/ui/SportIcon'
 import type { Bet } from '../types/domain'
 
 export function BetsPage() {
@@ -148,7 +149,8 @@ export function BetsPage() {
           {filtersOpen && (
             <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-charcoal-light p-4 sm:grid-cols-4">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                <span className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-400">
+                  <SportIcon league={filters.league} size={12} />
                   {t('bets.filterLeague')}
                 </span>
                 <select

@@ -5,6 +5,7 @@ import { formatCurrency, formatSignedCurrency } from '../../lib/format'
 import { formatOdds, type OddsFormat } from '../../lib/odds'
 import { useLocale } from '../../hooks/useLocale'
 import type { TranslationKey } from '../../lib/i18n'
+import { SportIcon } from '../ui/SportIcon'
 
 const STATUS_KEY: Record<BetStatus, TranslationKey> = {
   pending: 'betlist.statusPending',
@@ -67,9 +68,10 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
                 </div>
                 <div className="mt-1 space-y-0.5">
                   {bet.bet_legs.map((leg) => (
-                    <p key={leg.id} className="text-sm text-slate-200">
+                    <p key={leg.id} className="flex items-center text-sm text-slate-200">
                       {leg.league && (
-                        <span className="mr-1.5 rounded border border-border px-1 py-0.5 font-mono text-[10px] uppercase text-slate-400">
+                        <span className="mr-1.5 inline-flex items-center gap-1 rounded border border-border px-1 py-0.5 font-mono text-[10px] uppercase text-slate-400">
+                          <SportIcon league={leg.league} size={11} />
                           {leg.league}
                         </span>
                       )}

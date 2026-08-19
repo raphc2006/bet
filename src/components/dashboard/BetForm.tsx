@@ -6,6 +6,7 @@ import { formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
 import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
+import { SportIcon } from '../ui/SportIcon'
 import { LEAGUES, MARKET_OPTIONS } from '../../lib/constants'
 
 type LegFormState = {
@@ -192,7 +193,8 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
+                    <span className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-slate-400">
+                      <SportIcon league={leg.league} size={12} />
                       {t('betform.league')}
                     </span>
                     <select
