@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import type { Bet, BankrollAdjustment } from '../types/domain'
 import { combinedDecimalOdds } from './odds'
 
@@ -71,12 +72,12 @@ export function computeDailyNet(bets: Bet[], adjustments: BankrollAdjustment[]):
 
   for (const bet of bets) {
     if (!isSettled(bet) || !bet.settled_at) continue
-    const day = bet.settled_at.slice(0, 10)
+    const day = format(new Date(bet.settled_at), 'yyyy-MM-dd')
     byDay.set(day, (byDay.get(day) ?? 0) + betProfit(bet))
   }
 
   for (const adjustment of adjustments) {
-    const day = adjustment.created_at.slice(0, 10)
+    const day = format(new Date(adjustment.created_at), 'yyyy-MM-dd')
     byDay.set(day, (byDay.get(day) ?? 0) + adjustment.amount)
   }
 
