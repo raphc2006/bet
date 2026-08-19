@@ -7,7 +7,7 @@ import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
 
-const LEAGUES = ['MLB', 'NBA', 'NFL', 'NHL'] as const
+const LEAGUES = ['MLB', 'NBA', 'NFL', 'NHL', 'Soccer', 'Tennis'] as const
 
 type LegFormState = {
   event_description: string
