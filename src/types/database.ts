@@ -87,6 +87,7 @@ export type Database = {
           created_at: string
           event_description: string
           id: string
+          league: string | null
           market: string | null
           odds_decimal: number
           sort_order: number
@@ -98,6 +99,7 @@ export type Database = {
           created_at?: string
           event_description: string
           id?: string
+          league?: string | null
           market?: string | null
           odds_decimal: number
           sort_order?: number
@@ -109,6 +111,7 @@ export type Database = {
           created_at?: string
           event_description?: string
           id?: string
+          league?: string | null
           market?: string | null
           odds_decimal?: number
           sort_order?: number
