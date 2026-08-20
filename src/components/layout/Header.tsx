@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useLocale } from '../../hooks/useLocale'
 import { usePendingFriendRequestsCount } from '../../hooks/useFriends'
+import { useUnreadMessagesCount } from '../../hooks/useConversations'
 
 function TabLink({ to, label, badge }: { to: string; label: string; badge?: number }) {
   return (
@@ -24,10 +25,20 @@ function TabLink({ to, label, badge }: { to: string; label: string; badge?: numb
   )
 }
 
-export function Header({ children, friendRequestCount }: { children?: ReactNode; friendRequestCount?: number }) {
+export function Header({
+  children,
+  friendRequestCount,
+  unreadMessagesCount,
+}: {
+  children?: ReactNode
+  friendRequestCount?: number
+  unreadMessagesCount?: number
+}) {
   const { t } = useLocale()
   const { count: fetchedFriendRequestCount } = usePendingFriendRequestsCount()
+  const { count: fetchedUnreadMessagesCount } = useUnreadMessagesCount()
   const pendingFriendRequests = friendRequestCount ?? fetchedFriendRequestCount
+  const unreadMessages = unreadMessagesCount ?? fetchedUnreadMessagesCount
   return (
     <header className="border-b border-border">
       <div className="flex items-center justify-between px-6 py-4">
@@ -40,6 +51,7 @@ export function Header({ children, friendRequestCount }: { children?: ReactNode;
         <TabLink to="/" label={t('nav.dashboard')} />
         <TabLink to="/stats" label={t('nav.stats')} />
         <TabLink to="/bets" label={t('nav.bets')} />
+        <TabLink to="/messages" label={t('nav.messages')} badge={unreadMessages} />
         <TabLink to="/friends" label={t('nav.friends')} badge={pendingFriendRequests} />
       </nav>
     </header>
