@@ -21,6 +21,7 @@ export function SettingsPage() {
   const [oddsFormat, setOddsFormat] = useState<OddsFormat>('decimal')
   const [locale, setLocaleField] = useState<Locale>('fr')
   const [currency, setCurrency] = useState('EUR')
+  const [privateJournal, setPrivateJournal] = useState(false)
   const [initialized, setInitialized] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
@@ -34,6 +35,7 @@ export function SettingsPage() {
     setOddsFormat(profileState.profile.odds_format as OddsFormat)
     setLocaleField(profileState.profile.locale as Locale)
     setCurrency(bankrollState.bankroll.currency)
+    setPrivateJournal(profileState.profile.private_journal)
     setInitialized(true)
   }
 
@@ -90,6 +92,14 @@ export function SettingsPage() {
 
     if (bankrollState.bankroll && currency !== bankrollState.bankroll.currency) {
       const { error } = await bankrollState.updateCurrency(currency)
+      if (error) {
+        setSaving(false)
+        return setError(error)
+      }
+    }
+
+    if (profileState.profile && privateJournal !== profileState.profile.private_journal) {
+      const { error } = await profileState.updatePrivateJournal(privateJournal)
       if (error) {
         setSaving(false)
         return setError(error)
@@ -223,6 +233,28 @@ export function SettingsPage() {
                       </option>
                     ))}
                   </select>
+                </label>
+
+                <label className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5">
+                  <span>
+                    <span className="block text-sm font-medium text-slate-200">{t('settings.privateJournal')}</span>
+                    <span className="block text-xs text-slate-500">{t('settings.privateJournalHint')}</span>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={privateJournal}
+                    onClick={() => setPrivateJournal((v) => !v)}
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                      privateJournal ? 'bg-win' : 'bg-charcoal-lighter'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${
+                        privateJournal ? 'left-5' : 'left-0.5'
+                      }`}
+                    />
+                  </button>
                 </label>
 
                 {error && <p className="text-sm text-loss">{error}</p>}

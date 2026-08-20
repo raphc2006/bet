@@ -29,6 +29,7 @@ const fr = {
   'friends.back': '← Retour aux amis',
   'friends.viewError': "Impossible d'afficher ce profil (vous n'êtes peut-être plus amis).",
   'friends.journal': 'Journal de paris',
+  'friends.privateJournal': 'Le journal de paris de cet utilisateur est privé.',
 
   'stats.pageTitle': 'Statistiques',
   'stats.thisMonth': 'Ce mois-ci',
@@ -205,6 +206,8 @@ const fr = {
   'settings.usernameError': 'Le pseudo doit contenir 3 à 20 caractères (lettres, chiffres, underscore).',
   'settings.avatarSizeError': "L'image doit faire moins de 2 Mo.",
   'settings.avatarTypeError': 'Formats acceptés : JPG, PNG, GIF, WebP.',
+  'settings.privateJournal': 'Journal de paris privé',
+  'settings.privateJournalHint': 'Tes amis voient tes stats et ton calendrier, mais pas le détail de tes paris.',
 }
 
 const en: typeof fr = {
@@ -234,6 +237,7 @@ const en: typeof fr = {
   'friends.back': '← Back to friends',
   'friends.viewError': "Can't display this profile (you may no longer be friends).",
   'friends.journal': 'Bet journal',
+  'friends.privateJournal': "This user's bet journal is private.",
 
   'stats.pageTitle': 'Stats',
   'stats.thisMonth': 'This month',
@@ -410,6 +414,8 @@ const en: typeof fr = {
   'settings.usernameError': 'Username must be 3 to 20 characters (letters, digits, underscore).',
   'settings.avatarSizeError': 'Image must be under 2 MB.',
   'settings.avatarTypeError': 'Accepted formats: JPG, PNG, GIF, WebP.',
+  'settings.privateJournal': 'Private bet journal',
+  'settings.privateJournalHint': 'Your friends see your stats and calendar, but not the detail of your bets.',
 }
 
 const dictionaries: Record<Locale, Record<keyof typeof fr, string>> = { fr, en }

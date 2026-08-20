@@ -233,6 +233,7 @@ export type Database = {
           last_week_review_shown: string | null
           locale: string
           odds_format: string
+          private_journal: boolean
           username: string
         }
         Insert: {
@@ -242,6 +243,7 @@ export type Database = {
           last_week_review_shown?: string | null
           locale?: string
           odds_format?: string
+          private_journal?: boolean
           username: string
         }
         Update: {
@@ -251,6 +253,7 @@ export type Database = {
           last_week_review_shown?: string | null
           locale?: string
           odds_format?: string
+          private_journal?: boolean
           username?: string
         }
         Relationships: []

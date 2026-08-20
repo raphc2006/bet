@@ -80,6 +80,19 @@ export function useProfile() {
     return { error: null }
   }
 
+  async function updatePrivateJournal(privateJournal: boolean) {
+    if (!user) return { error: 'Non connecté.' }
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ private_journal: privateJournal })
+      .eq('id', user.id)
+      .select('*')
+      .single()
+    if (error) return { error: error.message }
+    setProfile(data)
+    return { error: null }
+  }
+
   async function updateLastWeekReviewShown(weekKey: string) {
     if (!user) return { error: 'Non connecté.' }
     const { data, error } = await supabase
@@ -129,6 +142,7 @@ export function useProfile() {
     updateOddsFormat,
     updateLocale,
     updateLastWeekReviewShown,
+    updatePrivateJournal,
     uploadAvatar,
     reload: load,
   }

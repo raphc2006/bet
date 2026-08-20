@@ -78,7 +78,13 @@ export function FriendProfilePage() {
 
             <section className="space-y-3">
               <h2 className="font-display text-lg font-semibold text-slate-100">{t('friends.journal')}</h2>
-              <BetList bets={friendView.bets} currency={currency} oddsFormat="decimal" readOnly />
+              {friendView.profile.private_journal ? (
+                <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-slate-500">
+                  {t('friends.privateJournal')}
+                </div>
+              ) : (
+                <BetList bets={friendView.bets} currency={currency} oddsFormat="decimal" readOnly />
+              )}
             </section>
           </>
         )}
