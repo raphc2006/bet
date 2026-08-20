@@ -1,25 +1,33 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useLocale } from '../../hooks/useLocale'
+import { usePendingFriendRequestsCount } from '../../hooks/useFriends'
 
-function TabLink({ to, label }: { to: string; label: string }) {
+function TabLink({ to, label, badge }: { to: string; label: string; badge?: number }) {
   return (
     <NavLink
       to={to}
       end={to === '/'}
       className={({ isActive }) =>
-        `border-b-2 px-3 py-2.5 text-sm font-medium transition ${
+        `relative border-b-2 px-3 py-2.5 text-sm font-medium transition ${
           isActive ? 'border-win text-win' : 'border-transparent text-slate-400 hover:text-slate-100'
         }`
       }
     >
       {label}
+      {!!badge && (
+        <span className="absolute right-0 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-loss px-1 font-mono text-[10px] font-semibold leading-none text-white">
+          {badge > 9 ? '9+' : badge}
+        </span>
+      )}
     </NavLink>
   )
 }
 
-export function Header({ children }: { children?: ReactNode }) {
+export function Header({ children, friendRequestCount }: { children?: ReactNode; friendRequestCount?: number }) {
   const { t } = useLocale()
+  const { count: fetchedFriendRequestCount } = usePendingFriendRequestsCount()
+  const pendingFriendRequests = friendRequestCount ?? fetchedFriendRequestCount
   return (
     <header className="border-b border-border">
       <div className="flex items-center justify-between px-6 py-4">
@@ -32,7 +40,7 @@ export function Header({ children }: { children?: ReactNode }) {
         <TabLink to="/" label={t('nav.dashboard')} />
         <TabLink to="/stats" label={t('nav.stats')} />
         <TabLink to="/bets" label={t('nav.bets')} />
-        <TabLink to="/friends" label={t('nav.friends')} />
+        <TabLink to="/friends" label={t('nav.friends')} badge={pendingFriendRequests} />
       </nav>
     </header>
   )

@@ -38,7 +38,7 @@ export function FriendsPage() {
 
   return (
     <div className="min-h-screen bg-charcoal">
-      <Header>
+      <Header friendRequestCount={friends.received.length}>
         <Link to="/settings" aria-label={t('nav.settings')}>
           <Avatar url={profileState.profile?.avatar_url ?? null} username={profileState.profile?.username ?? '?'} />
         </Link>

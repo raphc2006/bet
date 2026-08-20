@@ -102,3 +102,25 @@ export function useFriends() {
     reload: load,
   }
 }
+
+/** Nombre de demandes d'ami reçues et en attente (pour le badge de notification). */
+export function usePendingFriendRequestsCount() {
+  const { user } = useAuth()
+  const [count, setCount] = useState(0)
+
+  const load = useCallback(async () => {
+    if (!user) return
+    const { count: pendingCount, error } = await supabase
+      .from('friendships')
+      .select('*', { count: 'exact', head: true })
+      .eq('addressee_id', user.id)
+      .eq('status', 'pending')
+    if (!error) setCount(pendingCount ?? 0)
+  }, [user])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  return { count, reload: load }
+}
