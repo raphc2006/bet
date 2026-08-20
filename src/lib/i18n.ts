@@ -126,6 +126,8 @@ const fr = {
   'weeklyReview.messageNegative': "Semaine difficile. Fie-toi aux chiffres sur la durée plutôt qu'aux émotions du moment.",
   'weeklyReview.gotIt': 'Compris',
   'weeklyReview.viewButton': 'Revue de la semaine dernière',
+  'weeklyReview.share': 'Partager',
+  'weeklyReview.copied': 'Copié !',
 
   'betform.newTitle': 'Nouveau pari',
   'betform.editTitle': 'Modifier le pari',
@@ -329,6 +331,8 @@ const en: typeof fr = {
   'weeklyReview.messageNegative': 'Rough week. Trust the numbers over time rather than the emotions of the moment.',
   'weeklyReview.gotIt': 'Got it',
   'weeklyReview.viewButton': "Last week's review",
+  'weeklyReview.share': 'Share',
+  'weeklyReview.copied': 'Copied!',
 
   'betform.newTitle': 'New bet',
   'betform.editTitle': 'Edit bet',

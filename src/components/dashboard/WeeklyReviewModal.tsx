@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import type { Stats } from '../../lib/stats'
@@ -46,6 +47,39 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
   const dateFnsLocale = locale === 'fr' ? fr : enUS
   const positive = stats.totalProfit >= 0
   const weekLabel = `${format(weekStart, 'd MMM', { locale: dateFnsLocale })} – ${format(weekEnd, 'd MMM yyyy', { locale: dateFnsLocale })}`
+  const [copied, setCopied] = useState(false)
+
+  function buildShareText() {
+    const lines = [
+      `📊 ${t('weeklyReview.title')} — ${weekLabel}`,
+      `${t('weeklyReview.netProfit')}: ${formatSignedCurrency(stats.totalProfit, currency)}`,
+      `${t('stats.winRate')}: ${stats.winRate === null ? '—' : `${stats.winRate.toFixed(1)}%`}`,
+      `${t('stats.roi')}: ${stats.roi === null ? '—' : formatPercent(stats.roi)}`,
+      `${t('weeklyReview.record')}: ${stats.wins}-${stats.losses}`,
+    ]
+    if (stats.avgClv !== null) lines.push(`${t('stats.avgClv')}: ${formatPercent(stats.avgClv)}`)
+    if (bestBet) lines.push(`${t('weeklyReview.bestBet')}: ${betLabel(bestBet)} (${formatSignedCurrency(betProfit(bestBet), currency)})`)
+    if (worstBet && worstBet.id !== bestBet?.id) {
+      lines.push(`${t('weeklyReview.worstBet')}: ${betLabel(worstBet)} (${formatSignedCurrency(betProfit(worstBet), currency)})`)
+    }
+    lines.push('', 'BetTracker')
+    return lines.join('\n')
+  }
+
+  async function handleShare() {
+    const text = buildShareText()
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: t('weeklyReview.title'), text })
+      } catch {
+        // Partage annulé par l'utilisateur : rien à faire.
+      }
+      return
+    }
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
@@ -61,9 +95,18 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
               <h2 className="font-display text-2xl font-semibold text-slate-50">{t('weeklyReview.title')}</h2>
               <p className="mt-0.5 font-mono text-xs text-slate-500">{weekLabel}</p>
             </div>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-100" aria-label="Fermer">
-              ✕
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleShare}
+                className="text-xs font-medium text-slate-400 hover:text-slate-100"
+                aria-label={t('weeklyReview.share')}
+              >
+                {copied ? t('weeklyReview.copied') : t('weeklyReview.share')}
+              </button>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-100" aria-label="Fermer">
+                ✕
+              </button>
+            </div>
           </div>
 
           <div className={`rounded-xl border p-5 text-center ${positive ? 'border-win/30 bg-win/10' : 'border-loss/30 bg-loss/10'}`}>
