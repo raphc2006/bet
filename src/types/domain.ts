@@ -12,3 +12,4 @@ export type Friendship = Tables<'friendships'>
 export type Conversation = Tables<'conversations'>
 export type ConversationMember = Tables<'conversation_members'>
 export type Message = Tables<'messages'>
+export type MessageReaction = Tables<'message_reactions'>
