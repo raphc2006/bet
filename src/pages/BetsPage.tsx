@@ -15,6 +15,7 @@ import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
 import { BetForm } from '../components/dashboard/BetForm'
 import { BetList } from '../components/dashboard/BetList'
+import { BetShareModal } from '../components/dashboard/BetShareModal'
 import { DateNav } from '../components/ui/DateNav'
 import { SportIcon } from '../components/ui/SportIcon'
 import type { Bet } from '../types/domain'
@@ -37,6 +38,7 @@ export function BetsPage() {
   })
   const [formOpen, setFormOpen] = useState(false)
   const [editingBet, setEditingBet] = useState<Bet | null>(null)
+  const [sharingBet, setSharingBet] = useState<Bet | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<BetFilters>({})
 
@@ -258,6 +260,7 @@ export function BetsPage() {
             onEdit={openEditForm}
             onDelete={handleDelete}
             onSettle={betsState.settleBet}
+            onShare={setSharingBet}
             emptyMessage={hasActiveFilters ? t('bets.noFilterResults') : t('bets.noBetsForDay')}
           />
         )}
@@ -271,6 +274,10 @@ export function BetsPage() {
           onClose={() => setFormOpen(false)}
           onSubmit={editingBet ? (input) => betsState.updateBet(editingBet.id, input) : betsState.createBet}
         />
+      )}
+
+      {sharingBet && (
+        <BetShareModal bet={sharingBet} currency={currency} oddsFormat={oddsFormat} onClose={() => setSharingBet(null)} />
       )}
     </div>
   )

@@ -34,11 +34,12 @@ type Props = {
   onEdit?: (bet: Bet) => void
   onDelete?: (betId: string) => void
   onSettle?: (betId: string, status: BetStatus) => void
+  onShare?: (bet: Bet) => void
   emptyMessage?: string
   readOnly?: boolean
 }
 
-export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle, emptyMessage, readOnly }: Props) {
+export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle, onShare, emptyMessage, readOnly }: Props) {
   const { t, locale } = useLocale()
   const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US'
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -127,9 +128,17 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
                     {t('betlist.resetPending')}
                   </button>
                 )}
+                {onShare && (
+                  <button
+                    onClick={() => onShare(bet)}
+                    className="ml-auto rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
+                  >
+                    {t('betlist.share')}
+                  </button>
+                )}
                 <button
                   onClick={() => onEdit?.(bet)}
-                  className="ml-auto rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100"
+                  className={`rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-100 ${onShare ? '' : 'ml-auto'}`}
                 >
                   {t('betlist.edit')}
                 </button>
