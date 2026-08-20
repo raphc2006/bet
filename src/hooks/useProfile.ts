@@ -80,6 +80,19 @@ export function useProfile() {
     return { error: null }
   }
 
+  async function updateLastWeekReviewShown(weekKey: string) {
+    if (!user) return { error: 'Non connecté.' }
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ last_week_review_shown: weekKey })
+      .eq('id', user.id)
+      .select('*')
+      .single()
+    if (error) return { error: error.message }
+    setProfile(data)
+    return { error: null }
+  }
+
   async function uploadAvatar(file: File) {
     if (!user) return { error: 'Non connecté.' }
     if (file.size > MAX_AVATAR_BYTES) return { error: 'size' }
@@ -108,5 +121,15 @@ export function useProfile() {
     return { error: null }
   }
 
-  return { profile, loading, error, updateUsername, updateOddsFormat, updateLocale, uploadAvatar, reload: load }
+  return {
+    profile,
+    loading,
+    error,
+    updateUsername,
+    updateOddsFormat,
+    updateLocale,
+    updateLastWeekReviewShown,
+    uploadAvatar,
+    reload: load,
+  }
 }

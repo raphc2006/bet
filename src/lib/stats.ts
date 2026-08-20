@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { endOfISOWeek, format, startOfISOWeek, subWeeks } from 'date-fns'
 import type { Bet, BankrollAdjustment } from '../types/domain'
 import { combinedDecimalOdds } from './odds'
 import { MARKET_TYPES } from './constants'
@@ -124,6 +124,32 @@ export function betsOnDay(bets: Bet[], day: Date): Bet[] {
   const end = new Date(day)
   end.setHours(23, 59, 59, 999)
   return betsInRange(bets, start, end)
+}
+
+/** Plage (lundi-dimanche) et clé (ex: "2026-W34") de la semaine ISO précédente. */
+export function previousIsoWeekRange(reference: Date = new Date()): { start: Date; end: Date; key: string } {
+  const lastWeekRef = subWeeks(reference, 1)
+  const start = startOfISOWeek(lastWeekRef)
+  const end = endOfISOWeek(lastWeekRef)
+  return { start, end, key: format(start, "RRRR-'W'II") }
+}
+
+/** Description courte d'un pari (concat des légs) pour l'affichage dans la revue hebdomadaire. */
+export function betLabel(bet: Bet): string {
+  return bet.bet_legs.map((leg) => leg.event_description).join(' + ')
+}
+
+/** Meilleur et pire pari (par profit) parmi les paris réglés. */
+export function bestAndWorstBet(bets: Bet[]): { best: Bet | null; worst: Bet | null } {
+  const settled = bets.filter(isSettled)
+  if (settled.length === 0) return { best: null, worst: null }
+  let best = settled[0]
+  let worst = settled[0]
+  for (const bet of settled) {
+    if (betProfit(bet) > betProfit(best)) best = bet
+    if (betProfit(bet) < betProfit(worst)) worst = bet
+  }
+  return { best, worst }
 }
 
 export type BetFilters = {

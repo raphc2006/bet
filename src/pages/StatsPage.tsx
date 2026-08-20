@@ -6,6 +6,7 @@ import { useProfile } from '../hooks/useProfile'
 import { useBankroll } from '../hooks/useBankroll'
 import { useBets } from '../hooks/useBets'
 import { useLocale } from '../hooks/useLocale'
+import { useWeeklyReview } from '../hooks/useWeeklyReview'
 import { betsInRange, computeStats, computeDailyNet, filterBets } from '../lib/stats'
 import type { BetFilters } from '../lib/stats'
 import { LEAGUES, MARKET_TYPES } from '../lib/constants'
@@ -13,6 +14,7 @@ import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
 import { StatsGrid } from '../components/dashboard/StatsGrid'
 import { PnlCalendar } from '../components/dashboard/PnlCalendar'
+import { WeeklyReviewModal } from '../components/dashboard/WeeklyReviewModal'
 import { DateNav } from '../components/ui/DateNav'
 import { SportIcon } from '../components/ui/SportIcon'
 
@@ -23,6 +25,9 @@ export function StatsPage() {
   const profileState = useProfile()
   const bankrollState = useBankroll()
   const betsState = useBets()
+  const weeklyReview = useWeeklyReview(betsState.bets, profileState.profile, profileState.updateLastWeekReviewShown, {
+    autoShow: false,
+  })
 
   const [month, setMonth] = useState(() => new Date())
   const [week, setWeek] = useState(() => new Date())
@@ -78,7 +83,17 @@ export function StatsPage() {
       </Header>
 
       <main className="mx-auto max-w-4xl space-y-8 px-6 py-8">
-        <h1 className="font-display text-2xl font-semibold text-slate-50">{t('stats.pageTitle')}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-2xl font-semibold text-slate-50">{t('stats.pageTitle')}</h1>
+          {weeklyReview.hasData && (
+            <button
+              onClick={weeklyReview.open}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-400"
+            >
+              {t('weeklyReview.viewButton')}
+            </button>
+          )}
+        </div>
 
         <section className="space-y-3">
           <div className="flex items-center gap-3">
@@ -202,6 +217,18 @@ export function StatsPage() {
           </>
         )}
       </main>
+
+      {weeklyReview.isOpen && (
+        <WeeklyReviewModal
+          weekStart={weeklyReview.weekStart}
+          weekEnd={weeklyReview.weekEnd}
+          stats={weeklyReview.weekStats}
+          currency={currency}
+          bestBet={weeklyReview.bestBet}
+          worstBet={weeklyReview.worstBet}
+          onClose={weeklyReview.close}
+        />
+      )}
     </div>
   )
 }

@@ -4,12 +4,14 @@ import { useProfile } from '../hooks/useProfile'
 import { useBankroll } from '../hooks/useBankroll'
 import { useBets } from '../hooks/useBets'
 import { useLocale } from '../hooks/useLocale'
+import { useWeeklyReview } from '../hooks/useWeeklyReview'
 import { computeStats, computeBalanceSeries, currentBalance } from '../lib/stats'
 import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
 import { BankrollCard } from '../components/dashboard/BankrollCard'
 import { StatsGrid } from '../components/dashboard/StatsGrid'
 import { PnlChart } from '../components/dashboard/PnlChart'
+import { WeeklyReviewModal } from '../components/dashboard/WeeklyReviewModal'
 
 function ErrorBanner({ message }: { message: string }) {
   return (
@@ -31,6 +33,7 @@ export function DashboardPage() {
   const profileState = useProfile()
   const bankrollState = useBankroll()
   const betsState = useBets()
+  const weeklyReview = useWeeklyReview(betsState.bets, profileState.profile, profileState.updateLastWeekReviewShown)
 
   const stats = useMemo(() => computeStats(betsState.bets), [betsState.bets])
   const balanceSeries = useMemo(
@@ -75,6 +78,18 @@ export function DashboardPage() {
           )
         )}
       </main>
+
+      {weeklyReview.isOpen && (
+        <WeeklyReviewModal
+          weekStart={weeklyReview.weekStart}
+          weekEnd={weeklyReview.weekEnd}
+          stats={weeklyReview.weekStats}
+          currency={bankrollState.bankroll?.currency ?? 'EUR'}
+          bestBet={weeklyReview.bestBet}
+          worstBet={weeklyReview.worstBet}
+          onClose={weeklyReview.close}
+        />
+      )}
     </div>
   )
 }

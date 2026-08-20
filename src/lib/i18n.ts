@@ -117,6 +117,16 @@ const fr = {
   'stats.totalProfit': 'Profit total',
   'stats.avgClv': 'CLV moyen',
 
+  'weeklyReview.title': 'Revue de la semaine',
+  'weeklyReview.netProfit': 'Profit net',
+  'weeklyReview.record': 'Bilan',
+  'weeklyReview.bestBet': 'Meilleur pari',
+  'weeklyReview.worstBet': 'Pire pari',
+  'weeklyReview.messagePositive': 'Belle semaine ! Continue sur cette lancée, en gardant ta discipline de mise.',
+  'weeklyReview.messageNegative': "Semaine difficile. Fie-toi aux chiffres sur la durée plutôt qu'aux émotions du moment.",
+  'weeklyReview.gotIt': 'Compris',
+  'weeklyReview.viewButton': 'Revue de la semaine dernière',
+
   'betform.newTitle': 'Nouveau pari',
   'betform.editTitle': 'Modifier le pari',
   'betform.single': 'Simple',
@@ -309,6 +319,16 @@ const en: typeof fr = {
   'stats.roi': 'ROI',
   'stats.totalProfit': 'Total profit',
   'stats.avgClv': 'Avg. CLV',
+
+  'weeklyReview.title': 'Weekly review',
+  'weeklyReview.netProfit': 'Net profit',
+  'weeklyReview.record': 'Record',
+  'weeklyReview.bestBet': 'Best bet',
+  'weeklyReview.worstBet': 'Worst bet',
+  'weeklyReview.messagePositive': 'Great week! Keep it up, and stick to your staking discipline.',
+  'weeklyReview.messageNegative': 'Rough week. Trust the numbers over time rather than the emotions of the moment.',
+  'weeklyReview.gotIt': 'Got it',
+  'weeklyReview.viewButton': "Last week's review",
 
   'betform.newTitle': 'New bet',
   'betform.editTitle': 'Edit bet',

@@ -230,6 +230,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           id: string
+          last_week_review_shown: string | null
           locale: string
           odds_format: string
           username: string
@@ -238,6 +239,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id: string
+          last_week_review_shown?: string | null
           locale?: string
           odds_format?: string
           username: string
@@ -246,6 +248,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id?: string
+          last_week_review_shown?: string | null
           locale?: string
           odds_format?: string
           username?: string
