@@ -5,6 +5,7 @@ const COLORS = {
   border: '#2a3240',
   win: '#3ecf6e',
   loss: '#e0554f',
+  pending: '#7b8794',
   slate50: '#f8fafc',
   slate300: '#cbd5e1',
   slate400: '#94a3b8',
@@ -241,6 +242,155 @@ export async function renderReviewCardImage(opts: ReviewCardOptions): Promise<Bl
 
   // Footer
   y += 12
+  ctx.textAlign = 'center'
+  ctx.fillStyle = COLORS.slate600
+  ctx.font = '600 11px "Barlow Condensed", sans-serif'
+  ctx.fillText(opts.footer.toUpperCase(), x + contentW / 2, y)
+  ctx.textAlign = 'left'
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('toBlob a échoué'))), 'image/png')
+  })
+}
+
+export type BetCardOptions = {
+  username: string
+  typeLabel: string
+  legLines: string[]
+  stakeLabel: string
+  stakeValue: string
+  oddsLabel: string
+  oddsValue: string
+  resultLabel: string
+  resultValue: string
+  settled: boolean
+  positive: boolean | null
+  profitValue: string | null
+  footer: string
+}
+
+/** Dessine une carte de pari (thème sportsbook) sur un canvas et retourne un PNG. */
+export async function renderBetCardImage(opts: BetCardOptions): Promise<Blob> {
+  await document.fonts.ready
+
+  const S = 2
+  const W = 640
+  const margin = 16
+  const cardW = W - margin * 2
+  const padding = 24
+  const contentW = cardW - padding * 2
+  const accentColor = opts.positive === null ? COLORS.pending : opts.positive ? COLORS.win : COLORS.loss
+
+  const canvasProbe = document.createElement('canvas').getContext('2d')!
+  const legLineHeight = 20
+  const legLines: string[] = []
+  canvasProbe.font = '400 14px sans-serif'
+  for (const line of opts.legLines) {
+    legLines.push(...wrapText(canvasProbe, line, contentW))
+  }
+
+  let contentH = 0
+  if (opts.username) contentH += 34 // pseudo centré en haut
+  contentH += 16 // type
+  contentH += 4 + legLines.length * legLineHeight // légs
+  contentH += 16 + 34 // stats (label + valeur)
+  if (opts.settled && opts.profitValue) contentH += 16 + 40 // profit
+  contentH += 20 // footer
+
+  const cardH = padding * 2 + contentH
+  const H = cardH + margin * 2
+
+  const canvas = document.createElement('canvas')
+  canvas.width = W * S
+  canvas.height = H * S
+  const ctx = canvas.getContext('2d')!
+  ctx.scale(S, S)
+
+  // Fond
+  ctx.fillStyle = COLORS.charcoal
+  ctx.fillRect(0, 0, W, H)
+
+  // Carte
+  const cardX = margin
+  const cardY = margin
+  roundRect(ctx, cardX, cardY, cardW, cardH, 16)
+  ctx.fillStyle = COLORS.charcoalLight
+  ctx.fill()
+  ctx.lineWidth = 1
+  ctx.strokeStyle = COLORS.border
+  ctx.stroke()
+
+  // Accent du haut
+  ctx.save()
+  roundRect(ctx, cardX, cardY, cardW, 16, 16)
+  ctx.clip()
+  ctx.fillStyle = accentColor
+  ctx.fillRect(cardX, cardY, cardW, 4)
+  ctx.restore()
+
+  let x = cardX + padding
+  let y = cardY + padding
+
+  ctx.textBaseline = 'top'
+
+  // Pseudo, centré en haut
+  if (opts.username) {
+    ctx.textAlign = 'center'
+    ctx.fillStyle = COLORS.slate300
+    ctx.font = '700 22px "JetBrains Mono", monospace'
+    ctx.fillText(`@${opts.username}`, x + contentW / 2, y)
+    ctx.textAlign = 'left'
+    y += 34
+  }
+
+  // Type de pari
+  ctx.fillStyle = COLORS.slate400
+  ctx.font = '600 12px "JetBrains Mono", monospace'
+  ctx.fillText(opts.typeLabel.toUpperCase(), x, y)
+  y += 16 + 4
+
+  // Légs
+  ctx.fillStyle = COLORS.slate50
+  ctx.font = '400 14px sans-serif'
+  for (const line of legLines) {
+    ctx.fillText(line, x, y)
+    y += legLineHeight
+  }
+
+  // Mise / Cote / Résultat
+  y += 16
+  const colW = contentW / 3
+  const cols: [string, string][] = [
+    [opts.stakeLabel, opts.stakeValue],
+    [opts.oddsLabel, opts.oddsValue],
+    [opts.resultLabel, opts.resultValue],
+  ]
+  cols.forEach(([label, value], i) => {
+    const cx = x + colW * i
+    ctx.textAlign = 'center'
+    ctx.fillStyle = COLORS.slate500
+    ctx.font = '400 10px "JetBrains Mono", monospace'
+    ctx.fillText(label.toUpperCase(), cx + colW / 2, y)
+    ctx.fillStyle = COLORS.slate50
+    ctx.font = '400 14px "JetBrains Mono", monospace'
+    ctx.fillText(value, cx + colW / 2, y + 16)
+  })
+  ctx.textAlign = 'left'
+  y += 34
+
+  // Profit
+  if (opts.settled && opts.profitValue) {
+    y += 16
+    ctx.textAlign = 'center'
+    ctx.fillStyle = opts.positive ? COLORS.win : COLORS.loss
+    ctx.font = '700 32px "JetBrains Mono", monospace'
+    ctx.fillText(opts.profitValue, x + contentW / 2, y)
+    ctx.textAlign = 'left'
+    y += 40
+  }
+
+  // Footer
+  y += 4
   ctx.textAlign = 'center'
   ctx.fillStyle = COLORS.slate600
   ctx.font = '600 11px "Barlow Condensed", sans-serif'

@@ -277,7 +277,13 @@ export function BetsPage() {
       )}
 
       {sharingBet && (
-        <BetShareModal bet={sharingBet} currency={currency} oddsFormat={oddsFormat} onClose={() => setSharingBet(null)} />
+        <BetShareModal
+          username={profileState.profile?.username ?? ''}
+          bet={sharingBet}
+          currency={currency}
+          oddsFormat={oddsFormat}
+          onClose={() => setSharingBet(null)}
+        />
       )}
     </div>
   )

@@ -9,6 +9,7 @@ import { formatOdds, type OddsFormat } from '../../lib/odds'
 import type { Bet, BetStatus } from '../../types/domain'
 import type { TranslationKey } from '../../lib/i18n'
 import { SportIcon } from '../ui/SportIcon'
+import { renderBetCardImage } from '../../lib/shareImage'
 
 const STATUS_KEY: Record<BetStatus, TranslationKey> = {
   pending: 'betlist.statusPending',
@@ -18,13 +19,14 @@ const STATUS_KEY: Record<BetStatus, TranslationKey> = {
 }
 
 type Props = {
+  username: string
   bet: Bet
   currency: string
   oddsFormat: OddsFormat
   onClose: () => void
 }
 
-export function BetShareModal({ bet, currency, oddsFormat, onClose }: Props) {
+export function BetShareModal({ username, bet, currency, oddsFormat, onClose }: Props) {
   const { t } = useLocale()
   const { user } = useAuth()
   const conversationsState = useConversations()
@@ -71,9 +73,35 @@ export function BetShareModal({ bet, currency, oddsFormat, onClose }: Props) {
   async function handleSendToConversation(conversationId: string) {
     if (!user) return
     setSendingTo(conversationId)
+    const blob = await renderBetCardImage({
+      username,
+      typeLabel: bet.bet_type === 'single' ? t('betlist.single') : t('betlist.parlay', { n: bet.bet_legs.length }),
+      legLines: bet.bet_legs.map(
+        (leg) => `${leg.league ? `[${leg.league}] ` : ''}${leg.event_description}${leg.market ? ` · ${leg.market}` : ''}`,
+      ),
+      stakeLabel: t('betshare.stake'),
+      stakeValue: formatCurrency(bet.stake, currency),
+      oddsLabel: t('betshare.odds'),
+      oddsValue: formatOdds(odds, oddsFormat),
+      resultLabel: t('betshare.result'),
+      resultValue: t(STATUS_KEY[status]),
+      settled,
+      positive,
+      profitValue: settled ? formatSignedCurrency(profit, currency) : null,
+      footer: 'BetTracker',
+    })
+    const path = `${conversationId}/${crypto.randomUUID()}.png`
+    const { error: uploadError } = await supabase.storage.from('chat-images').upload(path, blob, {
+      contentType: 'image/png',
+    })
+    if (uploadError) {
+      setSendingTo(null)
+      return
+    }
+    const imageUrl = supabase.storage.from('chat-images').getPublicUrl(path).data.publicUrl
     const { error } = await supabase
       .from('messages')
-      .insert({ conversation_id: conversationId, sender_id: user.id, content: buildShareText() })
+      .insert({ conversation_id: conversationId, sender_id: user.id, content: '', image_url: imageUrl })
     setSendingTo(null)
     if (!error) setSentTo((prev) => new Set(prev).add(conversationId))
   }
