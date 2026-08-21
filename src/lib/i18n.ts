@@ -9,6 +9,7 @@ const fr = {
   'nav.dashboard': 'Tableau de bord',
   'nav.stats': 'Statistiques',
   'nav.bets': 'Paris',
+  'nav.market': 'Market',
   'nav.messages': 'Messages',
   'nav.friends': 'Amis',
 
@@ -263,6 +264,25 @@ const fr = {
   'settings.avatarTypeError': 'Formats acceptés : JPG, PNG, GIF, WebP.',
   'settings.privateJournal': 'Journal de paris privé',
   'settings.privateJournalHint': 'Tes amis voient tes stats et ton calendrier, mais pas le détail de tes paris.',
+
+  'market.pageTitle': 'Market',
+  'market.sport': 'Sport',
+  'market.dateFrom': 'Du',
+  'market.dateTo': 'Au',
+  'market.outcome': 'Résultat',
+  'market.marketH2h': 'Moneyline',
+  'market.marketSpreads': 'Spread',
+  'market.marketTotals': 'Total',
+  'market.loading': 'Chargement des cotes…',
+  'market.noEvents': 'Aucun match à venir pour cette période.',
+  'market.errorAuth': 'Clé API invalide ou abonnement The Odds API inactif.',
+  'market.errorPlan': 'Ce sport n’est pas disponible avec ton abonnement actuel sur The Odds API (le palier gratuit ne couvre que NBA et MLB).',
+  'market.errorQuota': 'Quota de requêtes atteint. Réessaie dans quelques instants.',
+  'market.errorNetwork': 'Impossible de contacter le service de cotes. Réessaie plus tard.',
+  'market.errorUnknown': 'Erreur inattendue lors de la récupération des cotes.',
+  'market.quotaRemaining': '{n} requêtes restantes ce mois-ci',
+  'market.quotaLow': 'Quota API bientôt atteint : {n} requêtes restantes ce mois-ci.',
+  'market.addBetSoon': 'Ajouter au journal — bientôt disponible',
 }
 
 const en: typeof fr = {
@@ -272,6 +292,7 @@ const en: typeof fr = {
   'nav.dashboard': 'Dashboard',
   'nav.stats': 'Stats',
   'nav.bets': 'Bets',
+  'nav.market': 'Market',
   'nav.messages': 'Messages',
   'nav.friends': 'Friends',
 
@@ -526,6 +547,25 @@ const en: typeof fr = {
   'settings.avatarTypeError': 'Accepted formats: JPG, PNG, GIF, WebP.',
   'settings.privateJournal': 'Private bet journal',
   'settings.privateJournalHint': 'Your friends see your stats and calendar, but not the detail of your bets.',
+
+  'market.pageTitle': 'Market',
+  'market.sport': 'Sport',
+  'market.dateFrom': 'From',
+  'market.dateTo': 'To',
+  'market.outcome': 'Outcome',
+  'market.marketH2h': 'Moneyline',
+  'market.marketSpreads': 'Spread',
+  'market.marketTotals': 'Total',
+  'market.loading': 'Loading odds…',
+  'market.noEvents': 'No upcoming games for this period.',
+  'market.errorAuth': 'Invalid API key or inactive The Odds API subscription.',
+  'market.errorPlan': "This sport isn't available on your current The Odds API plan (the free tier only covers NBA and MLB).",
+  'market.errorQuota': 'API quota reached. Try again in a moment.',
+  'market.errorNetwork': "Couldn't reach the odds service. Try again later.",
+  'market.errorUnknown': 'Unexpected error while fetching odds.',
+  'market.quotaRemaining': '{n} requests remaining this month',
+  'market.quotaLow': 'API quota running low: {n} requests remaining this month.',
+  'market.addBetSoon': 'Add to journal — coming soon',
 }
 
 const dictionaries: Record<Locale, Record<keyof typeof fr, string>> = { fr, en }
