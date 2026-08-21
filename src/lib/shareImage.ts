@@ -87,7 +87,7 @@ export async function renderReviewCardImage(opts: ReviewCardOptions): Promise<Bl
   const rowGap = 8
 
   let contentH = 0
-  if (opts.username) contentH += 20 // pseudo centré en haut
+  if (opts.username) contentH += 34 // pseudo centré en haut
   contentH += 30 + 18 // title + subtitle
   contentH += 16 + heroH // gap + hero box
   contentH += 12 + tileRows * tileH + (tileRows - 1) * tileGap // tiles
@@ -136,11 +136,11 @@ export async function renderReviewCardImage(opts: ReviewCardOptions): Promise<Bl
   // Pseudo, centré en haut
   if (opts.username) {
     ctx.textAlign = 'center'
-    ctx.fillStyle = COLORS.slate400
-    ctx.font = '600 13px "JetBrains Mono", monospace'
+    ctx.fillStyle = COLORS.slate300
+    ctx.font = '700 22px "JetBrains Mono", monospace'
     ctx.fillText(`@${opts.username}`, x + contentW / 2, y)
     ctx.textAlign = 'left'
-    y += 20
+    y += 34
   }
 
   // Titre
