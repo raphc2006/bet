@@ -58,6 +58,7 @@ export function WeeklyReviewModal({ username, weekStart, weekEnd, stats, currenc
   const [pickerOpen, setPickerOpen] = useState(false)
   const [sendingTo, setSendingTo] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<Set<string>>(new Set())
+  const [downloading, setDownloading] = useState(false)
 
   function buildShareText() {
     const lines = [
@@ -129,6 +130,18 @@ export function WeeklyReviewModal({ username, weekStart, weekEnd, stats, currenc
     }
   }
 
+  async function handleDownload() {
+    setDownloading(true)
+    const blob = await renderReviewCardImage(buildCardOptions())
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bettracker-weekly-review-${format(weekStart, 'yyyy-MM-dd')}.png`
+    a.click()
+    URL.revokeObjectURL(url)
+    setDownloading(false)
+  }
+
   async function handleSendToConversation(conversationId: string) {
     if (!user) return
     setSendingTo(conversationId)
@@ -195,12 +208,19 @@ export function WeeklyReviewModal({ username, weekStart, weekEnd, stats, currenc
             {positive ? t('weeklyReview.messagePositive') : t('weeklyReview.messageNegative')}
           </p>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={handleShare}
               className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-win hover:text-win"
             >
               {copied ? t('weeklyReview.copied') : t('weeklyReview.share')}
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-win hover:text-win disabled:opacity-50"
+            >
+              {t('weeklyReview.download')}
             </button>
             <button
               onClick={() => setPickerOpen((open) => !open)}

@@ -34,6 +34,7 @@ export function BetShareModal({ username, bet, currency, oddsFormat, onClose }: 
   const [sendingTo, setSendingTo] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<Set<string>>(new Set())
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   const settled = isSettled(bet)
   const profit = betProfit(bet)
@@ -70,10 +71,8 @@ export function BetShareModal({ username, bet, currency, oddsFormat, onClose }: 
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function handleSendToConversation(conversationId: string) {
-    if (!user) return
-    setSendingTo(conversationId)
-    const blob = await renderBetCardImage({
+  function buildCardOptions() {
+    return {
       username,
       typeLabel: bet.bet_type === 'single' ? t('betlist.single') : t('betlist.parlay', { n: bet.bet_legs.length }),
       legLines: bet.bet_legs.map(
@@ -89,7 +88,25 @@ export function BetShareModal({ username, bet, currency, oddsFormat, onClose }: 
       positive,
       profitValue: settled ? formatSignedCurrency(profit, currency) : null,
       footer: 'BetTracker',
-    })
+    }
+  }
+
+  async function handleDownload() {
+    setDownloading(true)
+    const blob = await renderBetCardImage(buildCardOptions())
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bettracker-bet-${bet.id}.png`
+    a.click()
+    URL.revokeObjectURL(url)
+    setDownloading(false)
+  }
+
+  async function handleSendToConversation(conversationId: string) {
+    if (!user) return
+    setSendingTo(conversationId)
+    const blob = await renderBetCardImage(buildCardOptions())
     const path = `${conversationId}/${crypto.randomUUID()}.png`
     const { error: uploadError } = await supabase.storage.from('chat-images').upload(path, blob, {
       contentType: 'image/png',
@@ -161,12 +178,19 @@ export function BetShareModal({ username, bet, currency, oddsFormat, onClose }: 
             <p className="mt-4 text-center font-display text-xs uppercase tracking-widest text-slate-600">BetTracker</p>
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={handleShare}
               className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-win hover:text-win"
             >
               {copied ? t('betshare.copied') : t('betshare.share')}
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-win hover:text-win disabled:opacity-50"
+            >
+              {t('betshare.download')}
             </button>
             <button
               onClick={() => setPickerOpen((open) => !open)}
