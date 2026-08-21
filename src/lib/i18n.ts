@@ -213,6 +213,7 @@ const fr = {
   'betlist.single': 'Simple',
   'betlist.parlay': 'Parlay ({n})',
   'betlist.share': 'Partager',
+  'betlist.overdue': 'À régler',
 
   'betshare.title': 'Partager le pari',
   'betshare.stake': 'Mise',
@@ -468,6 +469,7 @@ const en: typeof fr = {
   'betlist.single': 'Single',
   'betlist.parlay': 'Parlay ({n})',
   'betlist.share': 'Share',
+  'betlist.overdue': 'To settle',
 
   'betshare.title': 'Share bet',
   'betshare.stake': 'Stake',

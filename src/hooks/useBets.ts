@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { subDays } from 'date-fns'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import type { Bet, BetStatus, BetType } from '../types/domain'
@@ -128,4 +129,27 @@ export function useBets() {
   }
 
   return { bets, loading, error, createBet, updateBet, settleBet, deleteBet, reload: load }
+}
+
+/** Nombre de paris en attente depuis plus d'un jour (pour le badge de rappel). */
+export function useOverdueBetsCount() {
+  const { user } = useAuth()
+  const [count, setCount] = useState(0)
+
+  const load = useCallback(async () => {
+    if (!user) return
+    const { count: overdueCount, error } = await supabase
+      .from('bets')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .lt('placed_at', subDays(new Date(), 1).toISOString())
+    if (!error) setCount(overdueCount ?? 0)
+  }, [user])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  return { count, reload: load }
 }

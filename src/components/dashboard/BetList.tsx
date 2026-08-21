@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { subDays } from 'date-fns'
 import type { Bet, BetStatus } from '../../types/domain'
 import { betDecimalOdds, betProfit } from '../../lib/stats'
 import { formatCurrency, formatSignedCurrency } from '../../lib/format'
@@ -57,6 +58,7 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
       {bets.map((bet) => {
         const odds = betDecimalOdds(bet)
         const profit = betProfit(bet)
+        const isOverdue = bet.status === 'pending' && new Date(bet.placed_at) < subDays(new Date(), 1)
         return (
           <div key={bet.id} className="rounded-xl border border-border bg-charcoal-light p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -66,6 +68,11 @@ export function BetList({ bets, currency, oddsFormat, onEdit, onDelete, onSettle
                     {bet.bet_type === 'single' ? t('betlist.single') : t('betlist.parlay', { n: bet.bet_legs.length })}
                   </span>
                   <StatusBadge status={bet.status as BetStatus} />
+                  {isOverdue && (
+                    <span className="rounded-full border border-loss/30 bg-loss/10 px-2 py-0.5 text-xs font-medium text-loss">
+                      {t('betlist.overdue')}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-1 space-y-0.5">
                   {bet.bet_legs.map((leg) => (
