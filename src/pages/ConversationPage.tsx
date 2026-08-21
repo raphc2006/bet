@@ -7,32 +7,19 @@ import type { MessageWithSender } from '../hooks/useMessages'
 import { useLocale } from '../hooks/useLocale'
 import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
-import { EmojiPicker } from '../components/ui/EmojiPicker'
-
-function groupReactions(reactions: { user_id: string; emoji: string }[], currentUserId: string) {
-  const byEmoji = new Map<string, { count: number; mine: boolean }>()
-  for (const r of reactions) {
-    const entry = byEmoji.get(r.emoji) ?? { count: 0, mine: false }
-    entry.count += 1
-    if (r.user_id === currentUserId) entry.mine = true
-    byEmoji.set(r.emoji, entry)
-  }
-  return Array.from(byEmoji.entries()).map(([emoji, v]) => ({ emoji, ...v }))
-}
 
 export function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>()
   const { t, locale } = useLocale()
   const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US'
   const profileState = useProfile()
-  const { conversation, messages, loading, error, sendMessage, toggleReaction } = useMessages(conversationId)
+  const { conversation, messages, loading, error, sendMessage } = useMessages(conversationId)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [replyingTo, setReplyingTo] = useState<MessageWithSender | null>(null)
   const [pendingImage, setPendingImage] = useState<File | null>(null)
   const [pendingImagePreview, setPendingImagePreview] = useState<string | null>(null)
-  const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const currentUserId = profileState.profile?.id ?? ''
@@ -113,7 +100,6 @@ export function ConversationPage() {
               ) : (
                 messages.map((m) => {
                   const mine = m.sender_id === currentUserId
-                  const reactionGroups = groupReactions(m.reactions, currentUserId)
                   return (
                     <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
                       {conversation.type === 'group' && !mine && (
@@ -137,22 +123,6 @@ export function ConversationPage() {
                           {m.content && <p>{m.content}</p>}
                         </div>
 
-                        {reactionGroups.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {reactionGroups.map((r) => (
-                              <button
-                                key={r.emoji}
-                                onClick={() => toggleReaction(m.id, r.emoji)}
-                                className={`rounded-full border px-1.5 py-0.5 text-xs ${
-                                  r.mine ? 'border-win bg-win/10' : 'border-border bg-charcoal-lighter'
-                                }`}
-                              >
-                                {r.emoji} {r.count}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
                         <div className="flex items-center gap-2 text-[10px] text-slate-600">
                           <span className="font-mono">
                             {new Date(m.created_at).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' })}
@@ -160,17 +130,6 @@ export function ConversationPage() {
                           <button onClick={() => setReplyingTo(m)} className="hover:text-slate-300">
                             {t('messages.reply')}
                           </button>
-                          <div className="relative">
-                            <button onClick={() => setReactionPickerFor(m.id)} className="hover:text-slate-300">
-                              😊
-                            </button>
-                            {reactionPickerFor === m.id && (
-                              <EmojiPicker
-                                onSelect={(emoji) => toggleReaction(m.id, emoji)}
-                                onClose={() => setReactionPickerFor(null)}
-                              />
-                            )}
-                          </div>
                         </div>
                       </div>
                     </div>
