@@ -68,6 +68,11 @@ export function BetsPage() {
   const filteredBets = useMemo(() => filterBets(betsState.bets, filters), [betsState.bets, filters])
   const visibleBets = hasActiveFilters ? filteredBets : dayBets
 
+  const overdueBetsCount = useMemo(() => {
+    const cutoff = subDays(new Date(), 1)
+    return betsState.bets.filter((b) => b.status === 'pending' && new Date(b.placed_at) < cutoff).length
+  }, [betsState.bets])
+
   function updateFilter<K extends keyof BetFilters>(key: K, value: BetFilters[K]) {
     setFilters((prev) => ({ ...prev, [key]: value || undefined }))
   }
@@ -102,7 +107,7 @@ export function BetsPage() {
 
   return (
     <div className="min-h-screen bg-charcoal">
-      <Header>
+      <Header overdueBetsCount={overdueBetsCount}>
         <Link to="/settings" aria-label={t('nav.settings')}>
           <Avatar url={profileState.profile?.avatar_url ?? null} username={profileState.profile?.username ?? '?'} />
         </Link>
