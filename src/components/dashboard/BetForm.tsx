@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { format } from 'date-fns'
 import type { Bet, BetType } from '../../types/domain'
 import type { BetInput, LegInput } from '../../hooks/useBets'
 import { combinedDecimalOdds, formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
@@ -52,14 +53,9 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
   const [confidence, setConfidence] = useState(bet?.confidence ? String(bet.confidence) : '')
   const [notes, setNotes] = useState(bet?.notes ?? '')
   const [placedAt, setPlacedAt] = useState(() => {
-    if (bet) return bet.placed_at.slice(0, 16)
-    if (defaultDate) {
-      const now = new Date()
-      const combined = new Date(defaultDate)
-      combined.setHours(now.getHours(), now.getMinutes())
-      return combined.toISOString().slice(0, 16)
-    }
-    return new Date().toISOString().slice(0, 16)
+    if (bet) return format(new Date(bet.placed_at), 'yyyy-MM-dd')
+    if (defaultDate) return format(defaultDate, 'yyyy-MM-dd')
+    return format(new Date(), 'yyyy-MM-dd')
   })
   const [legs, setLegs] = useState<LegFormState[]>(bet ? legsFromBet(bet, defaultOddsFormat) : [emptyLeg()])
   const [finalOddsOverride, setFinalOddsOverride] = useState(Boolean(bet?.final_odds_decimal))
@@ -157,7 +153,7 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
       stake: stakeValue,
       confidence: confidence ? Number(confidence) : null,
       notes,
-      placed_at: new Date(placedAt).toISOString(),
+      placed_at: new Date(`${placedAt}T12:00:00`).toISOString(),
       final_odds_decimal: finalOddsDecimal,
       legs: parsedLegs,
     })
@@ -359,7 +355,7 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
         </div>
         <FormField
           label={t('betform.date')}
-          type="datetime-local"
+          type="date"
           value={placedAt}
           onChange={(e) => setPlacedAt(e.target.value)}
         />
