@@ -10,6 +10,7 @@ const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/web
 type MemberProfile = { user_id: string; username: string; avatar_url: string | null }
 export type ConversationDetail = Conversation & { members: MemberProfile[] }
 export type MessageReaction = { user_id: string; emoji: string }
+type ReplyTarget = { id: string; content: string; image_url: string | null; sender: { username: string } | null }
 export type MessageWithSender = {
   id: string
   sender_id: string
@@ -18,14 +19,16 @@ export type MessageWithSender = {
   reply_to_id: string | null
   created_at: string
   sender: { username: string; avatar_url: string | null } | null
-  reply_to: { id: string; content: string; image_url: string | null; sender: { username: string } | null } | null
+  reply_to: ReplyTarget | null
   reactions: MessageReaction[]
 }
 
+// reply_to est dérivé côté client depuis la liste des messages déjà chargés (voir loadMessages) :
+// l'embed PostgREST imbriqué (messages!reply_to_id -> profiles) sur une table auto-référencée
+// ne résout pas correctement le sender imbriqué, ce qui affichait un "?" vide pour chaque réponse.
 const MESSAGE_SELECT = `
   id, sender_id, content, image_url, reply_to_id, created_at,
   sender:profiles!messages_sender_id_fkey(username, avatar_url),
-  reply_to:messages!reply_to_id(id, content, image_url, sender:profiles!messages_sender_id_fkey(username)),
   reactions:message_reactions(user_id, emoji)
 `
 
@@ -64,7 +67,16 @@ export function useMessages(conversationId: string | undefined) {
       setError(error.message)
       return
     }
-    setMessages((data ?? []) as unknown as MessageWithSender[])
+    const raw = (data ?? []) as unknown as Omit<MessageWithSender, 'reply_to'>[]
+    const byId = new Map(raw.map((m) => [m.id, m]))
+    const withReplies: MessageWithSender[] = raw.map((m) => {
+      const parent = m.reply_to_id ? byId.get(m.reply_to_id) : undefined
+      const reply_to: ReplyTarget | null = parent
+        ? { id: parent.id, content: parent.content, image_url: parent.image_url, sender: parent.sender }
+        : null
+      return { ...m, reply_to }
+    })
+    setMessages(withReplies)
     await supabase
       .from('conversation_members')
       .update({ last_read_at: new Date().toISOString() })
