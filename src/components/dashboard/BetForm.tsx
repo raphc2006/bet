@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { format } from 'date-fns'
 import type { Bet, BetType } from '../../types/domain'
 import type { BetInput, LegInput } from '../../hooks/useBets'
 import { combinedDecimalOdds, formatOdds, parseOddsInput, type OddsFormat } from '../../lib/odds'
+import { parseBetSlipImage, type ParsedBetSlipLeg } from '../../lib/betSlipOcr'
 import { useLocale } from '../../hooks/useLocale'
 import { Modal } from '../ui/Modal'
 import { FormField } from '../auth/AuthCard'
@@ -21,6 +22,19 @@ type LegFormState = {
 
 function emptyLeg(): LegFormState {
   return { event_description: '', market: '', marketOther: '', league: '', oddsInput: '', closingOddsInput: '' }
+}
+
+function legFromOcr(leg: ParsedBetSlipLeg, oddsFormat: OddsFormat): LegFormState {
+  const isKnownMarket = leg.market !== null && (MARKET_OPTIONS as readonly string[]).includes(leg.market)
+  const isKnownLeague = leg.league !== null && (LEAGUES as readonly string[]).includes(leg.league)
+  return {
+    event_description: leg.event_description,
+    market: leg.market ? (isKnownMarket ? leg.market : 'Autre') : '',
+    marketOther: leg.market && !isKnownMarket ? leg.market : '',
+    league: isKnownLeague ? (leg.league as string) : '',
+    oddsInput: formatOdds(leg.odds_decimal, oddsFormat),
+    closingOddsInput: '',
+  }
 }
 
 function legsFromBet(bet: Bet, format: OddsFormat): LegFormState[] {
@@ -64,6 +78,31 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
   )
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [ocrLoading, setOcrLoading] = useState(false)
+  const [ocrError, setOcrError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleSlipFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setOcrError(null)
+    setOcrLoading(true)
+    const { data, error: importError } = await parseBetSlipImage(file)
+    setOcrLoading(false)
+    if (importError || !data) {
+      const key =
+        importError === 'size'
+          ? 'betform.importSizeError'
+          : importError === 'type'
+            ? 'betform.importTypeError'
+            : 'betform.importError'
+      return setOcrError(t(key))
+    }
+    setBetType(data.bet_type)
+    setLegs(data.legs.map((leg) => legFromOcr(leg, oddsFormat)))
+    if (data.stake) setStake(String(data.stake))
+  }
 
   function computedParlayOdds(): number | null {
     const decimals = legs
@@ -166,6 +205,25 @@ export function BetForm({ bet, defaultOddsFormat = 'decimal', defaultDate, onClo
     <Modal title={bet ? t('betform.editTitle') : t('betform.newTitle')} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <p className="text-sm text-loss">{error}</p>}
+
+        <div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            className="hidden"
+            onChange={handleSlipFile}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={ocrLoading}
+            className="w-full rounded-lg border border-dashed border-win/40 py-2 text-sm font-medium text-win transition hover:bg-win/10 disabled:opacity-50"
+          >
+            {ocrLoading ? t('betform.importLoading') : t('betform.importSlip')}
+          </button>
+          {ocrError && <p className="mt-1 text-xs text-loss">{ocrError}</p>}
+        </div>
 
         <div className="flex gap-2">
           <button
