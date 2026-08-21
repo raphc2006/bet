@@ -12,6 +12,7 @@ import { useLocale } from '../../hooks/useLocale'
 import { renderReviewCardImage } from '../../lib/shareImage'
 
 type Props = {
+  username: string
   weekStart: Date
   weekEnd: Date
   stats: Stats
@@ -46,7 +47,7 @@ function BetRow({ label, bet, currency, tone }: { label: string; bet: Bet; curre
   )
 }
 
-export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet, worstBet, onClose }: Props) {
+export function WeeklyReviewModal({ username, weekStart, weekEnd, stats, currency, bestBet, worstBet, onClose }: Props) {
   const { t, locale } = useLocale()
   const dateFnsLocale = locale === 'fr' ? fr : enUS
   const { user } = useAuth()
@@ -115,6 +116,7 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
       })
     }
     return {
+      username,
       title: t('weeklyReview.title'),
       subtitle: weekLabel,
       positive,

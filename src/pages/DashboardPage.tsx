@@ -81,6 +81,7 @@ export function DashboardPage() {
 
       {weeklyReview.isOpen && (
         <WeeklyReviewModal
+          username={profileState.profile?.username ?? ''}
           weekStart={weeklyReview.weekStart}
           weekEnd={weeklyReview.weekEnd}
           stats={weeklyReview.weekStats}

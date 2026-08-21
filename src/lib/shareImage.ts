@@ -50,6 +50,7 @@ export type ReviewCardTile = { label: string; value: string }
 export type ReviewCardRow = { label: string; text: string; amount: string; positive: boolean }
 
 export type ReviewCardOptions = {
+  username: string
   title: string
   subtitle: string
   positive: boolean
@@ -86,6 +87,7 @@ export async function renderReviewCardImage(opts: ReviewCardOptions): Promise<Bl
   const rowGap = 8
 
   let contentH = 0
+  if (opts.username) contentH += 20 // pseudo centré en haut
   contentH += 30 + 18 // title + subtitle
   contentH += 16 + heroH // gap + hero box
   contentH += 12 + tileRows * tileH + (tileRows - 1) * tileGap // tiles
@@ -129,8 +131,19 @@ export async function renderReviewCardImage(opts: ReviewCardOptions): Promise<Bl
   let x = cardX + padding
   let y = cardY + padding
 
-  // Titre
   ctx.textBaseline = 'top'
+
+  // Pseudo, centré en haut
+  if (opts.username) {
+    ctx.textAlign = 'center'
+    ctx.fillStyle = COLORS.slate400
+    ctx.font = '600 13px "JetBrains Mono", monospace'
+    ctx.fillText(`@${opts.username}`, x + contentW / 2, y)
+    ctx.textAlign = 'left'
+    y += 20
+  }
+
+  // Titre
   ctx.fillStyle = COLORS.slate50
   ctx.font = '600 24px "Barlow Condensed", sans-serif'
   ctx.fillText(opts.title, x, y)
