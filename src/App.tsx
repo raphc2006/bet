@@ -7,6 +7,7 @@ import { SignupPage } from './pages/SignupPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { StatsPage } from './pages/StatsPage'
 import { BetsPage } from './pages/BetsPage'
+import { MarketPage } from './pages/MarketPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { FriendsPage } from './pages/FriendsPage'
 import { FriendProfilePage } from './pages/FriendProfilePage'
@@ -42,6 +43,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <BetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/market"
+              element={
+                <ProtectedRoute>
+                  <MarketPage />
                 </ProtectedRoute>
               }
             />

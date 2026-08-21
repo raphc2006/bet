@@ -56,6 +56,7 @@ export function Header({
         <TabLink to="/" label={t('nav.dashboard')} />
         <TabLink to="/stats" label={t('nav.stats')} />
         <TabLink to="/bets" label={t('nav.bets')} badge={overdueBets} />
+        <TabLink to="/market" label={t('nav.market')} />
         <TabLink to="/messages" label={t('nav.messages')} badge={unreadMessages} />
         <TabLink to="/friends" label={t('nav.friends')} badge={pendingFriendRequests} />
       </nav>
