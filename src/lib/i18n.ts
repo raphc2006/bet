@@ -164,6 +164,7 @@ const fr = {
   'weeklyReview.viewButton': 'Revue de la semaine dernière',
   'weeklyReview.share': 'Partager',
   'weeklyReview.copied': 'Copié !',
+  'weeklyReview.download': 'Télécharger',
 
   'betform.newTitle': 'Nouveau pari',
   'betform.editTitle': 'Modifier le pari',
@@ -227,6 +228,7 @@ const fr = {
   'betshare.profit': 'Profit',
   'betshare.share': 'Partager',
   'betshare.copied': 'Copié !',
+  'betshare.download': 'Télécharger',
   'betshare.sendToChat': 'Envoyer dans une discussion',
   'betshare.sent': 'Envoyé !',
   'betshare.noConversations': 'Aucune discussion. Écris à un ami dans Messages.',
@@ -425,6 +427,7 @@ const en: typeof fr = {
   'weeklyReview.viewButton': "Last week's review",
   'weeklyReview.share': 'Share',
   'weeklyReview.copied': 'Copied!',
+  'weeklyReview.download': 'Download',
 
   'betform.newTitle': 'New bet',
   'betform.editTitle': 'Edit bet',
@@ -488,6 +491,7 @@ const en: typeof fr = {
   'betshare.profit': 'Profit',
   'betshare.share': 'Share',
   'betshare.copied': 'Copied!',
+  'betshare.download': 'Download',
   'betshare.sendToChat': 'Send to a chat',
   'betshare.sent': 'Sent!',
   'betshare.noConversations': 'No conversations yet. Message a friend in Messages.',
