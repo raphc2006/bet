@@ -58,6 +58,14 @@ const fr = {
   'friends.journal': 'Journal de paris',
   'friends.privateJournal': 'Le journal de paris de cet utilisateur est privé.',
 
+  'leaderboard.title': 'Classement',
+  'leaderboard.week': 'Semaine',
+  'leaderboard.month': 'Mois',
+  'leaderboard.metricProfit': 'Profit',
+  'leaderboard.metricRoi': 'ROI',
+  'leaderboard.metricWinRate': 'Win rate',
+  'leaderboard.you': 'toi',
+
   'stats.pageTitle': 'Statistiques',
   'stats.thisMonth': 'Ce mois-ci',
   'stats.thisWeek': 'Cette semaine',
@@ -304,6 +312,14 @@ const en: typeof fr = {
   'friends.viewError': "Can't display this profile (you may no longer be friends).",
   'friends.journal': 'Bet journal',
   'friends.privateJournal': "This user's bet journal is private.",
+
+  'leaderboard.title': 'Leaderboard',
+  'leaderboard.week': 'Week',
+  'leaderboard.month': 'Month',
+  'leaderboard.metricProfit': 'Profit',
+  'leaderboard.metricRoi': 'ROI',
+  'leaderboard.metricWinRate': 'Win rate',
+  'leaderboard.you': 'you',
 
   'stats.pageTitle': 'Stats',
   'stats.thisMonth': 'This month',

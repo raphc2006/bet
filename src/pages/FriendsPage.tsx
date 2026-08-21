@@ -4,14 +4,17 @@ import { Link } from 'react-router-dom'
 import { useProfile } from '../hooks/useProfile'
 import { useFriends } from '../hooks/useFriends'
 import type { SearchResult } from '../hooks/useFriends'
+import { useLeaderboard } from '../hooks/useLeaderboard'
 import { useLocale } from '../hooks/useLocale'
 import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
+import { LeaderboardCard } from '../components/dashboard/LeaderboardCard'
 
 export function FriendsPage() {
   const { t } = useLocale()
   const profileState = useProfile()
   const friends = useFriends()
+  const leaderboard = useLeaderboard()
 
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -46,6 +49,10 @@ export function FriendsPage() {
 
       <main className="mx-auto max-w-2xl space-y-8 px-6 py-8">
         <h1 className="font-display text-2xl font-semibold text-slate-50">{t('friends.pageTitle')}</h1>
+
+        {friends.accepted.length > 0 && profileState.profile && !leaderboard.loading && (
+          <LeaderboardCard entries={leaderboard.entries} currentUserId={profileState.profile.id} />
+        )}
 
         <section className="space-y-3">
           <h2 className="font-display text-lg font-semibold text-slate-100">{t('friends.search')}</h2>
