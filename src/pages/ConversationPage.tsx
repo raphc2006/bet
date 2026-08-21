@@ -32,7 +32,6 @@ export function ConversationPage() {
   const [replyingTo, setReplyingTo] = useState<MessageWithSender | null>(null)
   const [pendingImage, setPendingImage] = useState<File | null>(null)
   const [pendingImagePreview, setPendingImagePreview] = useState<string | null>(null)
-  const [composerEmojiOpen, setComposerEmojiOpen] = useState(false)
   const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -219,22 +218,6 @@ export function ConversationPage() {
                 >
                   📷
                 </button>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setComposerEmojiOpen((open) => !open)}
-                    aria-label={t('messages.addEmoji')}
-                    className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-slate-300 hover:border-slate-400"
-                  >
-                    😊
-                  </button>
-                  {composerEmojiOpen && (
-                    <EmojiPicker
-                      onSelect={(emoji) => setDraft((prev) => prev + emoji)}
-                      onClose={() => setComposerEmojiOpen(false)}
-                    />
-                  )}
-                </div>
                 <input
                   type="text"
                   value={draft}

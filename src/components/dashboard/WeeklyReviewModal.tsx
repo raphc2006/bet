@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
+import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../hooks/useAuth'
+import { useConversations } from '../../hooks/useConversations'
 import type { Stats } from '../../lib/stats'
 import { betLabel, betProfit } from '../../lib/stats'
 import type { Bet } from '../../types/domain'
@@ -45,9 +48,14 @@ function BetRow({ label, bet, currency, tone }: { label: string; bet: Bet; curre
 export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet, worstBet, onClose }: Props) {
   const { t, locale } = useLocale()
   const dateFnsLocale = locale === 'fr' ? fr : enUS
+  const { user } = useAuth()
+  const conversationsState = useConversations()
   const positive = stats.totalProfit >= 0
   const weekLabel = `${format(weekStart, 'd MMM', { locale: dateFnsLocale })} – ${format(weekEnd, 'd MMM yyyy', { locale: dateFnsLocale })}`
   const [copied, setCopied] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [sendingTo, setSendingTo] = useState<string | null>(null)
+  const [sentTo, setSentTo] = useState<Set<string>>(new Set())
 
   function buildShareText() {
     const lines = [
@@ -81,6 +89,16 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
     setTimeout(() => setCopied(false), 2000)
   }
 
+  async function handleSendToConversation(conversationId: string) {
+    if (!user) return
+    setSendingTo(conversationId)
+    const { error } = await supabase
+      .from('messages')
+      .insert({ conversation_id: conversationId, sender_id: user.id, content: buildShareText() })
+    setSendingTo(null)
+    if (!error) setSentTo((prev) => new Set(prev).add(conversationId))
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
       <div
@@ -95,18 +113,9 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
               <h2 className="font-display text-2xl font-semibold text-slate-50">{t('weeklyReview.title')}</h2>
               <p className="mt-0.5 font-mono text-xs text-slate-500">{weekLabel}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleShare}
-                className="text-xs font-medium text-slate-400 hover:text-slate-100"
-                aria-label={t('weeklyReview.share')}
-              >
-                {copied ? t('weeklyReview.copied') : t('weeklyReview.share')}
-              </button>
-              <button onClick={onClose} className="text-slate-400 hover:text-slate-100" aria-label="Fermer">
-                ✕
-              </button>
-            </div>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-100" aria-label="Fermer">
+              ✕
+            </button>
           </div>
 
           <div className={`rounded-xl border p-5 text-center ${positive ? 'border-win/30 bg-win/10' : 'border-loss/30 bg-loss/10'}`}>
@@ -135,6 +144,48 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
           <p className="mt-4 text-sm text-slate-300">
             {positive ? t('weeklyReview.messagePositive') : t('weeklyReview.messageNegative')}
           </p>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={handleShare}
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-win hover:text-win"
+            >
+              {copied ? t('weeklyReview.copied') : t('weeklyReview.share')}
+            </button>
+            <button
+              onClick={() => setPickerOpen((open) => !open)}
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-win hover:text-win"
+            >
+              {t('betshare.sendToChat')}
+            </button>
+          </div>
+
+          {pickerOpen && (
+            <div className="mt-3 space-y-2">
+              {conversationsState.loading ? (
+                <p className="text-xs text-slate-500">{t('dashboard.loading')}</p>
+              ) : conversationsState.conversations.length === 0 ? (
+                <p className="text-xs text-slate-500">{t('betshare.noConversations')}</p>
+              ) : (
+                conversationsState.conversations.map((c) => {
+                  const other = conversationsState.otherMember(c)
+                  const label = c.type === 'group' ? (c.name ?? '') : (other?.username ?? '?')
+                  const sent = sentTo.has(c.id)
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleSendToConversation(c.id)}
+                      disabled={sendingTo === c.id || sent}
+                      className="flex w-full items-center justify-between rounded-lg border border-border bg-charcoal-lighter px-3 py-2 text-sm text-slate-200 transition hover:border-win disabled:opacity-60"
+                    >
+                      <span>{c.type === 'group' ? `👥 ${label}` : label}</span>
+                      <span className="text-xs text-slate-500">{sent ? t('betshare.sent') : ''}</span>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          )}
 
           <button
             onClick={onClose}

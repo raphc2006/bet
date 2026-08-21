@@ -35,7 +35,6 @@ const fr = {
   'messages.replyingTo': 'Réponse à',
   'messages.addImage': 'Ajouter une photo',
   'messages.removeImage': 'Retirer la photo',
-  'messages.addEmoji': 'Ajouter un emoji',
   'messages.imageSizeError': "L'image doit faire moins de 5 Mo.",
   'messages.imageTypeError': 'Formats acceptés : JPG, PNG, GIF, WebP.',
 
@@ -283,7 +282,6 @@ const en: typeof fr = {
   'messages.replyingTo': 'Replying to',
   'messages.addImage': 'Add a photo',
   'messages.removeImage': 'Remove photo',
-  'messages.addEmoji': 'Add an emoji',
   'messages.imageSizeError': 'Image must be under 5 MB.',
   'messages.imageTypeError': 'Accepted formats: JPG, PNG, GIF, WebP.',
 
