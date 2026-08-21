@@ -9,6 +9,7 @@ import { betLabel, betProfit } from '../../lib/stats'
 import type { Bet } from '../../types/domain'
 import { formatPercent, formatSignedCurrency } from '../../lib/format'
 import { useLocale } from '../../hooks/useLocale'
+import { renderReviewCardImage } from '../../lib/shareImage'
 
 type Props = {
   weekStart: Date
@@ -89,12 +90,59 @@ export function WeeklyReviewModal({ weekStart, weekEnd, stats, currency, bestBet
     setTimeout(() => setCopied(false), 2000)
   }
 
+  function buildCardOptions() {
+    const tiles = [
+      { label: t('stats.winRate'), value: stats.winRate === null ? '—' : `${stats.winRate.toFixed(1)}%` },
+      { label: t('stats.roi'), value: stats.roi === null ? '—' : formatPercent(stats.roi) },
+      { label: t('weeklyReview.record'), value: `${stats.wins}-${stats.losses}` },
+      { label: t('stats.avgClv'), value: stats.avgClv === null ? '—' : formatPercent(stats.avgClv) },
+    ]
+    const rows = []
+    if (bestBet) {
+      rows.push({
+        label: t('weeklyReview.bestBet'),
+        text: betLabel(bestBet),
+        amount: formatSignedCurrency(betProfit(bestBet), currency),
+        positive: true,
+      })
+    }
+    if (worstBet && worstBet.id !== bestBet?.id) {
+      rows.push({
+        label: t('weeklyReview.worstBet'),
+        text: betLabel(worstBet),
+        amount: formatSignedCurrency(betProfit(worstBet), currency),
+        positive: false,
+      })
+    }
+    return {
+      title: t('weeklyReview.title'),
+      subtitle: weekLabel,
+      positive,
+      heroLabel: t('weeklyReview.netProfit'),
+      heroValue: formatSignedCurrency(stats.totalProfit, currency),
+      tiles,
+      rows,
+      message: positive ? t('weeklyReview.messagePositive') : t('weeklyReview.messageNegative'),
+      footer: 'BetTracker',
+    }
+  }
+
   async function handleSendToConversation(conversationId: string) {
     if (!user) return
     setSendingTo(conversationId)
+    const blob = await renderReviewCardImage(buildCardOptions())
+    const path = `${conversationId}/${crypto.randomUUID()}.png`
+    const { error: uploadError } = await supabase.storage.from('chat-images').upload(path, blob, {
+      contentType: 'image/png',
+    })
+    if (uploadError) {
+      setSendingTo(null)
+      return
+    }
+    const imageUrl = supabase.storage.from('chat-images').getPublicUrl(path).data.publicUrl
     const { error } = await supabase
       .from('messages')
-      .insert({ conversation_id: conversationId, sender_id: user.id, content: buildShareText() })
+      .insert({ conversation_id: conversationId, sender_id: user.id, content: '', image_url: imageUrl })
     setSendingTo(null)
     if (!error) setSentTo((prev) => new Set(prev).add(conversationId))
   }
