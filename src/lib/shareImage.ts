@@ -48,7 +48,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
 }
 
 export type ReviewCardTile = { label: string; value: string }
-export type ReviewCardRow = { label: string; text: string; amount: string; positive: boolean }
+export type ReviewCardRow = { label: string; text: string; amount: string; positive: boolean | null }
 
 export type ReviewCardOptions = {
   username: string
@@ -221,7 +221,7 @@ export async function renderReviewCardImage(opts: ReviewCardOptions): Promise<Bl
       ctx.fillText(text, x + 12, y + 28)
 
       ctx.textAlign = 'right'
-      ctx.fillStyle = row.positive ? COLORS.win : COLORS.loss
+      ctx.fillStyle = row.positive === null ? COLORS.pending : row.positive ? COLORS.win : COLORS.loss
       ctx.font = '600 14px "JetBrains Mono", monospace'
       ctx.fillText(row.amount, x + contentW - 12, y + 19)
       ctx.textAlign = 'left'

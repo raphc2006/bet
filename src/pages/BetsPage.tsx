@@ -16,6 +16,7 @@ import { Avatar } from '../components/layout/Avatar'
 import { BetForm } from '../components/dashboard/BetForm'
 import { BetList } from '../components/dashboard/BetList'
 import { BetShareModal } from '../components/dashboard/BetShareModal'
+import { DayShareModal } from '../components/dashboard/DayShareModal'
 import { DateNav } from '../components/ui/DateNav'
 import { SportIcon } from '../components/ui/SportIcon'
 import type { Bet } from '../types/domain'
@@ -39,6 +40,7 @@ export function BetsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingBet, setEditingBet] = useState<Bet | null>(null)
   const [sharingBet, setSharingBet] = useState<Bet | null>(null)
+  const [sharingDay, setSharingDay] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<BetFilters>({})
 
@@ -147,14 +149,20 @@ export function BetsPage() {
               className="rounded-lg border border-border bg-charcoal-lighter px-2 py-1 font-mono text-xs text-slate-300 outline-none focus:border-win"
             />
           </DateNav>
-          {!isToday(selectedDate) && (
-            <button
-              onClick={() => setSelectedDate(new Date())}
-              className="text-xs text-win hover:underline"
-            >
-              {t('bets.today')}
-            </button>
-          )}
+          <div className="flex items-center justify-between">
+            {!isToday(selectedDate) ? (
+              <button onClick={() => setSelectedDate(new Date())} className="text-xs text-win hover:underline">
+                {t('bets.today')}
+              </button>
+            ) : (
+              <span />
+            )}
+            {!hasActiveFilters && dayBets.length > 0 && (
+              <button onClick={() => setSharingDay(true)} className="text-xs text-slate-400 hover:text-slate-100">
+                {t('dayshare.share')}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -288,6 +296,16 @@ export function BetsPage() {
           currency={currency}
           oddsFormat={oddsFormat}
           onClose={() => setSharingBet(null)}
+        />
+      )}
+
+      {sharingDay && (
+        <DayShareModal
+          username={profileState.profile?.username ?? ''}
+          dateLabel={dayLabel}
+          bets={dayBets}
+          currency={currency}
+          onClose={() => setSharingDay(false)}
         />
       )}
     </div>

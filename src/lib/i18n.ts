@@ -233,6 +233,11 @@ const fr = {
   'betshare.sent': 'Envoyé !',
   'betshare.noConversations': 'Aucune discussion. Écris à un ami dans Messages.',
 
+  'dayshare.share': 'Partager la journée',
+  'dayshare.title': 'Résumé de la journée',
+  'dayshare.messagePositive': 'Belle journée ! Continue sur cette lancée.',
+  'dayshare.messageNegative': 'Journée difficile. Ça repart demain.',
+
   'calendar.weekday.mon': 'L',
   'calendar.weekday.tue': 'M',
   'calendar.weekday.wed': 'M',
@@ -495,6 +500,11 @@ const en: typeof fr = {
   'betshare.sendToChat': 'Send to a chat',
   'betshare.sent': 'Sent!',
   'betshare.noConversations': 'No conversations yet. Message a friend in Messages.',
+
+  'dayshare.share': 'Share the day',
+  'dayshare.title': 'Day summary',
+  'dayshare.messagePositive': 'Great day! Keep it up.',
+  'dayshare.messageNegative': 'Rough day. Back at it tomorrow.',
 
   'calendar.weekday.mon': 'M',
   'calendar.weekday.tue': 'T',
