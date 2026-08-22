@@ -1,24 +1,33 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { addDays, format, isToday, subDays } from 'date-fns'
+import { fr, enUS } from 'date-fns/locale'
 import { useProfile } from '../hooks/useProfile'
 import { useFriendView } from '../hooks/useFriendView'
 import { useLocale } from '../hooks/useLocale'
-import { computeStats, computeDailyNet, computeBalanceSeries, currentBalance } from '../lib/stats'
+import { computeStats, computeDailyNet, computeBalanceSeries, currentBalance, betsOnDay } from '../lib/stats'
 import { Header } from '../components/layout/Header'
 import { Avatar } from '../components/layout/Avatar'
 import { StatsGrid } from '../components/dashboard/StatsGrid'
 import { PnlChart } from '../components/dashboard/PnlChart'
 import { PnlCalendar } from '../components/dashboard/PnlCalendar'
 import { BetList } from '../components/dashboard/BetList'
+import { DateNav } from '../components/ui/DateNav'
 
 export function FriendProfilePage() {
   const { userId } = useParams<{ userId: string }>()
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
+  const dateFnsLocale = locale === 'fr' ? fr : enUS
   const profileState = useProfile()
   const friendView = useFriendView(userId)
   const [month, setMonth] = useState(() => new Date())
+  const [selectedDate, setSelectedDate] = useState(() => new Date())
 
   const stats = useMemo(() => computeStats(friendView.bets), [friendView.bets])
+  const dayBets = useMemo(() => betsOnDay(friendView.bets, selectedDate), [friendView.bets, selectedDate])
+  const dayLabel = isToday(selectedDate)
+    ? `${t('bets.today')} · ${format(selectedDate, 'd MMMM yyyy', { locale: dateFnsLocale })}`
+    : format(selectedDate, 'EEEE d MMMM yyyy', { locale: dateFnsLocale })
   const dailyNet = useMemo(
     () => computeDailyNet(friendView.bets, friendView.adjustments),
     [friendView.bets, friendView.adjustments],
@@ -73,7 +82,13 @@ export function FriendProfilePage() {
 
             <section className="space-y-3">
               <h2 className="font-display text-lg font-semibold text-slate-100">{t('stats.thisMonth')}</h2>
-              <PnlCalendar dailyNet={dailyNet} currency={currency} month={month} onMonthChange={setMonth} />
+              <PnlCalendar
+                dailyNet={dailyNet}
+                currency={currency}
+                month={month}
+                onMonthChange={setMonth}
+                onDayClick={friendView.profile.private_journal ? undefined : setSelectedDate}
+              />
             </section>
 
             <section className="space-y-3">
@@ -83,7 +98,29 @@ export function FriendProfilePage() {
                   {t('friends.privateJournal')}
                 </div>
               ) : (
-                <BetList bets={friendView.bets} currency={currency} oddsFormat="decimal" readOnly />
+                <>
+                  <div className="space-y-2">
+                    <DateNav
+                      label={dayLabel}
+                      onPrev={() => setSelectedDate((d) => subDays(d, 1))}
+                      onNext={() => setSelectedDate((d) => addDays(d, 1))}
+                    >
+                      <input
+                        type="date"
+                        aria-label={t('bets.pickDate')}
+                        value={format(selectedDate, 'yyyy-MM-dd')}
+                        onChange={(e) => e.target.value && setSelectedDate(new Date(`${e.target.value}T12:00:00`))}
+                        className="rounded-lg border border-border bg-charcoal-lighter px-2 py-1 font-mono text-xs text-slate-300 outline-none focus:border-win"
+                      />
+                    </DateNav>
+                    {!isToday(selectedDate) && (
+                      <button onClick={() => setSelectedDate(new Date())} className="text-xs text-win hover:underline">
+                        {t('bets.today')}
+                      </button>
+                    )}
+                  </div>
+                  <BetList bets={dayBets} currency={currency} oddsFormat="decimal" readOnly emptyMessage={t('bets.noBetsForDay')} />
+                </>
               )}
             </section>
           </>
