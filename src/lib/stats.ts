@@ -39,8 +39,10 @@ export function computeStats(bets: Bet[]): Stats {
   const wins = settled.filter((b) => b.status === 'won').length
   const losses = settled.filter((b) => b.status === 'lost').length
   const pushes = settled.filter((b) => b.status === 'push').length
+  const decisive = settled.filter((b) => b.status !== 'push')
   const decisiveCount = wins + losses
   const totalStaked = settled.reduce((sum, b) => sum + b.stake, 0)
+  const decisiveStaked = decisive.reduce((sum, b) => sum + b.stake, 0)
   const totalProfit = settled.reduce((sum, b) => sum + betProfit(b), 0)
 
   const clvValues: number[] = []
@@ -62,7 +64,7 @@ export function computeStats(bets: Bet[]): Stats {
     winRate: decisiveCount > 0 ? (wins / decisiveCount) * 100 : null,
     totalStaked,
     totalProfit,
-    roi: totalStaked > 0 ? (totalProfit / totalStaked) * 100 : null,
+    roi: decisiveStaked > 0 ? (totalProfit / decisiveStaked) * 100 : null,
     avgClv: clvValues.length > 0 ? clvValues.reduce((a, b) => a + b, 0) / clvValues.length : null,
   }
 }
