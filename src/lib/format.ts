@@ -20,3 +20,12 @@ export function formatSignedCompact(amount: number, currency = 'EUR'): string {
   }).format(Math.abs(amount))
   return amount >= 0 ? `+${formatted}` : `-${formatted}`
 }
+
+/** Comme formatSignedCompact mais sans le symbole de devise, pour les espaces très étroits (ex: calendrier mobile). */
+export function formatSignedCompactNumber(amount: number): string {
+  const formatted = new Intl.NumberFormat('fr-FR', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(Math.abs(amount))
+  return amount >= 0 ? `+${formatted}` : `-${formatted}`
+}
