@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameMonth, startOfMonth, startOfWeek, subMonths } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
-import { formatSignedCompact, formatSignedCurrency } from '../../lib/format'
+import { formatSignedCompactNumber, formatSignedCurrency } from '../../lib/format'
 import { useLocale } from '../../hooks/useLocale'
 
 type Props = {
@@ -71,7 +71,7 @@ export function PnlCalendar({ dailyNet, currency, month, onMonthChange, onDayCli
               type="button"
               onClick={() => onDayClick?.(day)}
               title={net !== undefined ? formatSignedCurrency(net, currency) : undefined}
-              className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-md text-[11px] transition ${
+              className={`flex min-h-[3.75rem] flex-col items-center justify-center gap-1 rounded-md text-xs transition ${
                 inMonth ? 'text-slate-300' : 'text-slate-700'
               } ${onDayClick ? 'cursor-pointer hover:ring-1 hover:ring-slate-500' : ''}`}
               style={{ backgroundColor: bg }}
@@ -79,11 +79,11 @@ export function PnlCalendar({ dailyNet, currency, month, onMonthChange, onDayCli
               <span>{format(day, 'd')}</span>
               {net !== undefined && net !== 0 && (
                 <span
-                  className={`font-mono text-[9px] leading-none ${
+                  className={`whitespace-nowrap font-mono text-[11px] font-semibold leading-none ${
                     net > 0 ? 'text-win' : 'text-loss'
                   } ${inMonth ? '' : 'opacity-50'}`}
                 >
-                  {formatSignedCompact(net, currency)}
+                  {formatSignedCompactNumber(net)}
                 </span>
               )}
             </button>
