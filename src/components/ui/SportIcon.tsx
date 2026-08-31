@@ -29,7 +29,40 @@ const ICONS: Record<string, (props: { size: number }) => ReactElement> = {
       />
     </svg>
   ),
+WNBA: ({ size }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M10 1.5v17M1.5 10h17M3.4 4.4c3.6 3.6 3.6 7.6 0 11.2M16.6 4.4c-3.6 3.6-3.6 7.6 0 11.2"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+NCAAB: ({ size }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M10 1.5v17M1.5 10h17M3.4 4.4c3.6 3.6 3.6 7.6 0 11.2M16.6 4.4c-3.6 3.6-3.6 7.6 0 11.2"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
   NFL: ({ size }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M2 10c0-3.5 3.5-7 8-7s8 3.5 8 7-3.5 7-8 7-8-3.5-8-7Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M6 10h8M8.5 8.3v3.4M10 8v4M11.5 8.3v3.4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  ),
+NCAAF: ({ size }) => (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M2 10c0-3.5 3.5-7 8-7s8 3.5 8 7-3.5 7-8 7-8-3.5-8-7Z"
