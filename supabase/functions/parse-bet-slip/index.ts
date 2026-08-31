@@ -32,7 +32,7 @@ Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour et sans balises
 Règles :
 - "odds_decimal" est TOUJOURS au format décimal (ex: 1.85). Si la cote affichée est au format américain (ex: -110, +250) ou fractionnaire, convertis-la en décimal.
 - "market" doit être un de "Spread", "Total", "Moneyline", "Prop", ou une courte description si aucun ne correspond bien.
-- "league" doit être un de "MLB", "NBA", "NFL", "NHL", "Soccer", "Tennis", ou null si tu ne peux pas déterminer la ligue.
+- "league" doit être un de "MLB", "NBA", "NFL", "NHL", "Soccer", "Tennis", "WNBA", "NCAAF", "NCAAB", ou null si tu ne peux pas déterminer la ligue.
 - "event_description" est une description courte et claire de l'événement et de la sélection (ex: "Lakers - Celtics, Lakers à gagner").
 - S'il y a plusieurs sélections (parlay/combiné), "bet_type" est "parlay" et chaque sélection est un élément de "legs" (au moins 2).
 - S'il n'y a qu'une seule sélection, "bet_type" est "single" et "legs" contient un seul élément.
